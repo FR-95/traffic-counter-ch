@@ -46,12 +46,22 @@ const roadNumbers = new Map(
   [...readDat(dir, 'ROADS.DAT'), ...readDat(dir, 'SEGMENTS.DAT')].map((row) => [row.LCD, row.ROADNUMBER]),
 );
 
+const offsets = new Map(readDat(dir, 'POFFSETS.DAT').map((row) => [row.LCD, row]));
+const code = (value: string | undefined) => (value ? Number(value) : null);
+
 const output: TmcFile = {};
 for (const point of readDat(dir, 'POINTS.DAT')) {
-  const name = names.get(point.N1ID);
-  if (!point.LCD || !name) continue;
+  if (!point.LCD) continue;
   const road = roadNumbers.get(point.ROA_LCD) || roadNumbers.get(point.SEG_LCD) || names.get(point.RNID) || null;
-  output[point.LCD] = [name, road, coordinate(point.YCOORD), coordinate(point.XCOORD)];
+  const neighbours = offsets.get(point.LCD);
+  output[point.LCD] = [
+    names.get(point.N1ID) ?? '',
+    road,
+    coordinate(point.YCOORD),
+    coordinate(point.XCOORD),
+    code(neighbours?.NEG_OFF_LCD),
+    code(neighbours?.POS_OFF_LCD),
+  ];
 }
 
 const target = fileURLToPath(new URL('../data/tmc-locations.json', import.meta.url));

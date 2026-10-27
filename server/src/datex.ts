@@ -1,6 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
+import { locate } from './position.ts';
 import type { TmcLookup } from './tmc.ts';
-import type { Counter, CounterValues, Direction, LaneValues, MeasurementsResponse, VehicleClass } from './types.ts';
+import type { Carriageway, Counter, CounterValues, Direction, LaneValues, MeasurementsResponse, VehicleClass } from './types.ts';
 
 interface Channel {
   kind: 'flow' | 'speed';
@@ -12,7 +13,9 @@ export interface SiteRecord {
   counterId: string;
   direction: Direction | null;
   lane: string | null;
+  carriageway: Carriageway | null;
   locationCode: number | null;
+  offsetDistance: number | null;
   lat: number | null;
   lng: number | null;
   channels: Map<string, Channel>;
@@ -90,6 +93,21 @@ function toDirection(value: string | null): Direction | null {
   return value === 'positive' || value === 'negative' ? value : null;
 }
 
+const CARRIAGEWAYS: Record<string, Carriageway> = {
+  mainCarriageway: 'main',
+  parallelCarriageway: 'parallel',
+  entrySlipRoad: 'entry',
+  exitSlipRoad: 'exit',
+};
+
+function toCarriageway(value: string | null): Carriageway | null {
+  return value === null ? null : (CARRIAGEWAYS[value] ?? 'other');
+}
+
+function isThroughLane(record: SiteRecord | undefined): boolean {
+  return record?.carriageway === 'main' || record?.carriageway === 'parallel';
+}
+
 /** "CH:0542.05" (Fahrstreifen) -> "CH:0542" (Zählstelle) */
 export function counterIdOf(laneId: string): string {
   return laneId.replace(/\.\d+$/, '');
@@ -124,7 +142,9 @@ function parseRecord(node: unknown): SiteRecord | null {
     counterId: counterIdOf(id),
     direction: toDirection(text(get(alertC, 'alertCDirection', 'alertCDirectionCoded'))),
     lane: text(get(lanes[0], 'lane')),
+    carriageway: toCarriageway(text(get(lanes[0], 'carriageway'))),
     locationCode: num(get(primary, 'alertCLocation', 'specificLocation')),
+    offsetDistance: num(get(primary, 'offsetDistance', 'offsetDistance')),
     lat: num(get(coordinates, 'latitude')),
     lng: num(get(coordinates, 'longitude')),
     channels,
@@ -140,10 +160,7 @@ export function parseSiteTable(xml: string): SiteTable {
   return { publicationTime: text(get(payload, 'publicationTime')), records };
 }
 
-/**
- * Fasst Fahrstreifen zu Zählstellen zusammen. Die API rundet Koordinaten auf
- * zwei Nachkommastellen (~1 km), daher werden die TMC-Koordinaten bevorzugt.
- */
+/** Fasst Fahrstreifen zu Zählstellen zusammen; Position = Mittel der Fahrstreifen-Positionen. */
 export function buildCounters(records: SiteRecord[], tmc: TmcLookup): Counter[] {
   const groups = new Map<string, SiteRecord[]>();
   for (const record of records) {
@@ -155,21 +172,19 @@ export function buildCounters(records: SiteRecord[], tmc: TmcLookup): Counter[] 
   const counters: Counter[] = [];
   for (const [id, lanes] of groups) {
     lanes.sort((a, b) => a.id.localeCompare(b.id));
+    const positions = lanes.map((lane) => locate(lane, tmc)).filter((position) => position !== null);
+    if (positions.length === 0) continue;
     const location = lanes
       .map((lane) => (lane.locationCode === null ? undefined : tmc(lane.locationCode)))
       .find((entry) => entry !== undefined);
-    const fallback = lanes.find((lane) => lane.lat !== null && lane.lng !== null);
-    const lat = location?.lat ?? fallback?.lat ?? null;
-    const lng = location?.lng ?? fallback?.lng ?? null;
-    if (lat === null || lng === null) continue;
 
     counters.push({
       id,
-      name: location?.name ?? id,
+      name: location?.name || id,
       road: location?.road ?? null,
-      lat,
-      lng,
-      lanes: lanes.map(({ id: laneId, direction, lane }) => ({ id: laneId, direction, lane })),
+      lat: Math.round((positions.reduce((sum, p) => sum + p.lat, 0) / positions.length) * 1e5) / 1e5,
+      lng: Math.round((positions.reduce((sum, p) => sum + p.lng, 0) / positions.length) * 1e5) / 1e5,
+      lanes: lanes.map(({ id: laneId, direction, lane, carriageway }) => ({ id: laneId, direction, lane, carriageway })),
     });
   }
   return counters.sort((a, b) => a.id.localeCompare(b.id));
@@ -253,8 +268,11 @@ export function parseMeasurements(xml: string, records: Map<string, SiteRecord>)
   const counters: Record<string, CounterValues> = {};
   for (const [counterId, lanes] of lanesByCounter) {
     const values = Object.values(lanes);
+    const through = Object.entries(lanes)
+      .filter(([laneId]) => isThroughLane(records.get(laneId)))
+      .map(([, lane]) => lane);
     counters[counterId] = {
-      ...aggregate(values),
+      ...aggregate(through.length > 0 ? through : values),
       lanes,
       errors: [...new Set(values.map((lane) => lane.error).filter((error) => error !== null))],
     };

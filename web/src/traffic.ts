@@ -1,4 +1,4 @@
-import type { CounterValues, Direction } from '../../server/src/types.ts';
+import type { Carriageway, CounterValues, Direction, Lane } from '../../server/src/types.ts';
 
 export type Status = 'jam' | 'slow' | 'free' | 'nodata';
 
@@ -35,11 +35,18 @@ export function errorText(code: string): string {
   return ERROR_MESSAGES[code] ?? `Messfehler (${code})`;
 }
 
-export function laneLabel(lane: string | null): string {
-  if (!lane) return 'Fahrstreifen';
-  if (lane === 'emergencyLane') return 'Pannenstreifen';
-  const number = /^lane(\d+)$/.exec(lane)?.[1];
-  return number ? `Spur ${number}` : lane;
+const CARRIAGEWAY_LABELS: Partial<Record<Carriageway, string>> = {
+  entry: 'Einfahrt',
+  exit: 'Ausfahrt',
+  parallel: 'Parallelfahrbahn',
+  other: 'Nebenfahrbahn',
+};
+
+export function laneLabel({ lane, carriageway }: Lane): string {
+  const number = lane && /^lane(\d+)$/.exec(lane)?.[1];
+  const base = !lane ? 'Fahrstreifen' : lane === 'emergencyLane' ? 'Pannenstreifen' : number ? `Spur ${number}` : lane;
+  const suffix = carriageway && CARRIAGEWAY_LABELS[carriageway];
+  return suffix ? `${base} (${suffix})` : base;
 }
 
 export function directionLabel(direction: Direction | null): string {

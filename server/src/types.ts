@@ -2,11 +2,13 @@
 
 export type Direction = 'positive' | 'negative';
 export type VehicleClass = 'car' | 'lorry' | 'any';
+export type Carriageway = 'main' | 'parallel' | 'entry' | 'exit' | 'other';
 
 export interface Lane {
   id: string;
   direction: Direction | null;
   lane: string | null;
+  carriageway: Carriageway | null;
 }
 
 export interface Counter {
@@ -33,6 +35,7 @@ export interface LaneValues {
 }
 
 export interface CounterValues {
+  /** Summe über die Hauptfahrbahn; Ein-/Ausfahrten nur, wenn es keine Hauptfahrbahn gibt */
   flow: number | null;
   speed: number | null;
   lanes: Record<string, LaneValues>;

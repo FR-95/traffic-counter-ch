@@ -23,7 +23,7 @@ function LaneRow({ lane, values }: { lane: Lane; values: LaneValues | undefined 
   if (values?.error) {
     return (
       <tr>
-        <th scope="row">{laneLabel(lane.lane)}</th>
+        <th scope="row">{laneLabel(lane)}</th>
         <td colSpan={2} className="error">
           {errorText(values.error)}
         </td>
@@ -33,7 +33,7 @@ function LaneRow({ lane, values }: { lane: Lane; values: LaneValues | undefined 
   const hasClasses = values?.flow.car !== undefined || values?.flow.lorry !== undefined;
   return (
     <tr>
-      <th scope="row">{laneLabel(lane.lane)}</th>
+      <th scope="row">{laneLabel(lane)}</th>
       <td>
         {hasClasses
           ? `${format(values?.flow.car, 'Fz/h')} · ${format(values?.speed.car, 'km/h')}`
@@ -66,6 +66,10 @@ export function CounterDetails({ counter, values, status, onClose }: Props) {
         <dt>Ø Geschwindigkeit</dt>
         <dd>{format(values?.speed, 'km/h')}</dd>
       </dl>
+      {counter.lanes.some((lane) => lane.carriageway === 'main') &&
+        counter.lanes.some((lane) => lane.carriageway === 'entry' || lane.carriageway === 'exit') && (
+          <p className="muted small">Summe und Durchschnitt ohne Ein- und Ausfahrten.</p>
+        )}
 
       {groupByDirection(counter.lanes).map(([direction, lanes]) => (
         <table key={direction}>
