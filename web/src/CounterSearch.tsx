@@ -16,7 +16,11 @@ export function CounterSearch({ counters, onPick }: { counters: Counter[]; onPic
     const needle = normalize(query.trim());
     if (needle.length < 2) return [];
     return counters
-      .filter((counter) => normalize(`${counter.name} ${counter.id} ${counter.road ?? ''} ${counter.canton ?? ''}`).includes(needle))
+      .filter((counter) =>
+        normalize(
+          `${counter.name} ${counter.id} ${counter.road ?? ''} ${counter.canton ?? ''} ${counter.source} ${counter.operator}`,
+        ).includes(needle),
+      )
       .slice(0, MAX_RESULTS);
   }, [counters, query]);
 
@@ -24,7 +28,7 @@ export function CounterSearch({ counters, onPick }: { counters: Counter[]; onPic
     <div className="search">
       <input
         type="search"
-        placeholder="Zählstelle suchen (Ort, Strasse, Nummer) …"
+        placeholder="Zählstelle suchen (Ort, Strasse, Nummer, Betreiber) …"
         aria-label="Zählstelle suchen"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
@@ -41,7 +45,7 @@ export function CounterSearch({ counters, onPick }: { counters: Counter[]; onPic
                 }}
               >
                 {counter.name}
-                <span className="muted small"> {[counter.road, counter.canton, counter.id].filter(Boolean).join(' · ')}</span>
+                <span className="muted small"> {[counter.road, counter.canton, counter.operator, counter.id].filter(Boolean).join(' · ')}</span>
               </button>
             </li>
           ))}

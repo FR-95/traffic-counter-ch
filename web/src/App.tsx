@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
+import type { Counter } from '../../server/src/types.ts';
 import { CounterDetails } from './CounterDetails.tsx';
+import { CounterGroups } from './CounterGroups.tsx';
 import { CounterSearch } from './CounterSearch.tsx';
+import { groupKey } from './groups.ts';
 import { formatTimestamp, measurementTimeOf, statusMessages } from './status.ts';
 import { STATUSES, statusOf, type Status } from './traffic.ts';
 import { TrafficMap, type MapCounter, type MapFocus } from './TrafficMap.tsx';
@@ -11,6 +14,7 @@ const ALL_STATUSES = Object.keys(STATUSES) as Status[];
 export function App() {
   const { counters, measurements, health, serverError, checkedAt } = useTrafficData();
   const [visible, setVisible] = useState<Set<Status>>(() => new Set(ALL_STATUSES));
+  const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(() => new Set());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focus, setFocus] = useState<MapFocus | null>(null);
   const [tileProblem, setTileProblem] = useState<string | null>(null);
@@ -24,11 +28,16 @@ export function App() {
     [counters, measurements],
   );
 
+  const groupCounters = useMemo(
+    () => mapCounters.filter(({ counter }) => !hiddenGroups.has(groupKey(counter))),
+    [mapCounters, hiddenGroups],
+  );
+
   const totals = useMemo(() => {
     const result = Object.fromEntries(ALL_STATUSES.map((status) => [status, 0])) as Record<Status, number>;
-    for (const { status } of mapCounters) result[status]++;
+    for (const { status } of groupCounters) result[status]++;
     return result;
-  }, [mapCounters]);
+  }, [groupCounters]);
 
   const selected = mapCounters.find(({ counter }) => counter.id === selectedId);
   const measuredAt = measurementTimeOf(measurements);
@@ -48,6 +57,22 @@ export function App() {
       else next.add(status);
       return next;
     });
+
+  const toggleGroups = (keys: string[], show: boolean) =>
+    setHiddenGroups((current) => {
+      const next = new Set(current);
+      for (const key of keys) {
+        if (show) next.delete(key);
+        else next.add(key);
+      }
+      return next;
+    });
+
+  const pick = (counter: Counter) => {
+    if (hiddenGroups.has(groupKey(counter))) toggleGroups([groupKey(counter)], true);
+    setSelectedId(counter.id);
+    setFocus({ lat: counter.lat, lng: counter.lng, key: Date.now() });
+  };
 
   return (
     <div className="layout">
@@ -71,13 +96,7 @@ export function App() {
           </ul>
         )}
 
-        <CounterSearch
-          counters={counters}
-          onPick={(counter) => {
-            setSelectedId(counter.id);
-            setFocus({ lat: counter.lat, lng: counter.lng, key: Date.now() });
-          }}
-        />
+        <CounterSearch counters={counters} onPick={pick} />
 
         <fieldset className="legend">
           <legend>Verkehrslage</legend>
@@ -91,6 +110,8 @@ export function App() {
           ))}
           <p className="muted small">Kreisgrösse = Fahrzeuge pro Stunde</p>
         </fieldset>
+
+        <CounterGroups counters={mapCounters} hidden={hiddenGroups} onToggle={toggleGroups} onPick={pick} />
 
         {selected ? (
           <CounterDetails {...selected} onClose={() => setSelectedId(null)} />
@@ -109,7 +130,7 @@ export function App() {
 
       <main className="map">
         <TrafficMap
-          counters={mapCounters.filter(({ status }) => visible.has(status))}
+          counters={groupCounters.filter(({ status }) => visible.has(status))}
           selected={selected?.counter}
           focus={focus}
           onSelect={setSelectedId}

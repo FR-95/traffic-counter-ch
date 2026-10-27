@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { originOf } from './origin.ts';
 import { locate } from './position.ts';
 import { NO_SENSORS, type SensorLookup } from './sensors.ts';
 import type { TmcLookup } from './tmc.ts';
@@ -185,12 +186,15 @@ export function buildCounters(records: SiteRecord[], tmc: TmcLookup, sensors: Se
       .map((lane) => (lane.locationCode === null ? undefined : tmc(lane.locationCode)))
       .find((entry) => entry !== undefined);
     const info = sensors.counter(id);
+    const origin = originOf(id);
 
     counters.push({
       id,
       name: info?.name || location?.name || id,
       road: info?.road ?? location?.road ?? null,
-      canton: info?.canton ?? null,
+      canton: info?.canton ?? origin.canton,
+      source: origin.source,
+      operator: origin.operator,
       lat: round6(positions.reduce((sum, p) => sum + p.lat, 0) / positions.length),
       lng: round6(positions.reduce((sum, p) => sum + p.lng, 0) / positions.length),
       lanes: located.map(({ lane, sensor, position }) => ({

@@ -60,6 +60,8 @@ export function CounterDetails({ counter, values, status, onClose }: Props) {
       <p className="muted">
         {[counter.road, counter.canton, counter.id].filter(Boolean).join(' · ')}
         <br />
+        {counter.operator === counter.source ? counter.operator : `${counter.operator} (${counter.source})`}
+        <br />
         {counter.lanes.every((lane) => lane.exact)
           ? 'Standort exakt (ASTRA-Sensoren)'
           : counter.lanes.some((lane) => lane.exact)

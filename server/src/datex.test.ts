@@ -35,7 +35,15 @@ describe('buildCounters', () => {
       code === 100 ? { name: 'Wankdorf', road: 'A6', lat: 46.9631, lng: 7.4652, negative: null, positive: null } : undefined;
     const counters = buildCounters(parseSiteTable(siteTableXml).records, tmc);
     expect(counters).toHaveLength(2);
-    expect(counters[0]).toMatchObject({ id: 'CH:0001', name: 'Wankdorf', road: 'A6', lat: 46.9631, lng: 7.4652 });
+    expect(counters[0]).toMatchObject({
+      id: 'CH:0001',
+      name: 'Wankdorf',
+      road: 'A6',
+      source: 'Bund',
+      operator: 'ASTRA',
+      lat: 46.9631,
+      lng: 7.4652,
+    });
     expect(counters[0]?.lanes.map((lane) => lane.direction)).toEqual(['positive', 'negative']);
     expect(counters[1]).toMatchObject({ id: 'CH:0002', name: 'CH:0002', road: null, lat: 46.96, lng: 7.47 });
   });

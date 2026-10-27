@@ -96,6 +96,80 @@ a {
   color: #59636e;
 }
 
+.groups ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.groups .group > ul {
+  padding-left: 1.4rem;
+}
+
+.groups .source {
+  font-weight: 600;
+}
+
+.groups .operator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.groups .operator .count {
+  margin-left: 0;
+  min-width: 2.5ch;
+  text-align: right;
+}
+
+.groups .operator label {
+  margin-right: auto;
+}
+
+.groups .expand {
+  border: none;
+  background: none;
+  font: inherit;
+  color: #59636e;
+  cursor: pointer;
+  padding: 0 0.3rem;
+}
+
+.groups .counters {
+  max-height: 14rem;
+  overflow-y: auto;
+  margin: 0.25rem 0 0.4rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+.groups .counters li + li {
+  border-top: 1px solid #eaeef2;
+}
+
+.groups .counters button {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.groups .counters button:hover,
+.groups .counters button:focus-visible {
+  background: #f6f8fa;
+}
+
+.groups .counters .dot {
+  flex-shrink: 0;
+}
+
 .details header {
   display: flex;
   justify-content: space-between;

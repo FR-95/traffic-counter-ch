@@ -22,6 +22,10 @@ export interface Counter {
   name: string;
   road: string | null;
   canton: string | null;
+  /** Herkunft laut ID-Präfix: "Bund" oder "Kanton …" */
+  source: string;
+  /** Betreiber laut ID-Präfix, z. B. "ASTRA", "Kanton Zürich" */
+  operator: string;
   lat: number;
   lng: number;
   lanes: Lane[];
