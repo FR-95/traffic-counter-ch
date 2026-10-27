@@ -2,11 +2,11 @@ import type { Carriageway, CounterValues, Direction, Lane } from '../../server/s
 
 export type Status = 'jam' | 'slow' | 'free' | 'nodata';
 
-export const STATUSES: Record<Status, { label: string; color: string }> = {
-  jam: { label: 'Stau (< 10 km/h)', color: '#d7191c' },
-  slow: { label: 'Stockend (< 30 km/h)', color: '#f28e2b' },
-  free: { label: 'Flüssig', color: '#1a9641' },
-  nodata: { label: 'Keine Daten', color: '#9e9e9e' },
+export const STATUSES: Record<Status, { label: string; token: `--traffic-${Status}` }> = {
+  jam: { label: 'Stau (< 10 km/h)', token: '--traffic-jam' },
+  slow: { label: 'Stockend (< 30 km/h)', token: '--traffic-slow' },
+  free: { label: 'Flüssig', token: '--traffic-free' },
+  nodata: { label: 'Keine Daten', token: '--traffic-nodata' },
 };
 
 export function statusOf(values: CounterValues | undefined): Status {

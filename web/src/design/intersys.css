@@ -1,0 +1,179 @@
+/* Generiert mit npm run ds:sync aus dem Intersys Design System (export 1792747615-1951). Nicht von Hand ändern:
+   Auswahl in web/scripts/ds-sync.ts anpassen, eigene Ergänzungen gehören in additions.css. */
+/* Intersys Design System: tokens.css */
+/* Intersys — generated from tokens.json */
+:root, [data-theme="light"] {
+  --deep-teal: #104c5d; /* Dominante Markenfarbe: Primärfläche, Overlay auf Fotografie (70–85% Tönung), Text auf hellen Flächen. 55–70% Flächenanteil in digitalen Anwendungen. Kontrast zu white: 9.5:1. */
+  --growth-peach: #f2b880; /* Akzentfarbe, ausschliesslich für Zeile 2 der Kernbotschaft ("Sicher wachsen.") und vergleichbar positive, wachstumsorientierte Aussagen. 5–10% Flächenanteil, nie grossflächig. Kontrast zu deep-teal: 5.4:1 — nur für grosse/fette Schrift, nicht für Fliesstext. */
+  --white: #ffffff; /* Text und Logo auf deep-teal oder dunklen Bildflächen; Fläche des Primary-Buttons. 20–35% Flächenanteil. Kontrast zu deep-teal: 9.5:1. */
+  --dark-teal: #0a3945; /* Tiefe Flächen und zusätzliche Kontrastebene, z. B. hinter oder unter deep-teal für Tiefenwirkung. */
+  --soft-surface: #f7f9f9; /* Empfohlene neutrale Kartenfläche auf hellen Seiten (zusammen mit line-gray 5–15% Flächenanteil). */
+  --line-gray: #d9e1e3; /* Linien, Divider, Tabellenrahmen; Kartenrahmen auf soft-surface statt Schatten. */
+  --body-ink: #15343c; /* Textfarbe auf hellen Flächen (soft-surface, white) — Gegenstück zu white als Textfarbe auf deep-teal. */
+  --legacy-blue: #002b5c; /* Nur für bestehende Alt-Anwendungen und Archivmaterial vor 2026. Nicht in neuen digitalen Auftritten oder Kampagnen verwenden. */
+  --ink-muted: #4b6269; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Gedämpfter Text: Teaser-Beschreibungen, Meta-Angaben, Hinweise, Bildunterschriften auf white, soft-surface, teal-surface und peach-surface (≥5.5:1). */
+  --on-dark-muted: #c4d6db; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Gedämpfter Text auf deep-teal (6.3:1) und dark-teal (8.3:1): Footer-Text, CTA-Untertitel, Breadcrumb im Page-Header. */
+  --teal-surface: #e7eff1; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Helle Teal-Tönung: Tabellenkopf, Tags, Initialen-Platzhalter, Bild-Platzhalter, Lösungs-Signal. Text darauf: deep-teal (8.1:1) oder ink-muted. */
+  --peach-surface: #fdf2e6; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Sehr helle Peach-Tönung für Hinweise (Notice), Herausforderungs-Signal und Freigabe-Banner — macht Peach als Fläche nutzbar, ohne die 5–10%-Regel zu verletzen. Text darauf: body-ink. */
+  --control-border: #73878d; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Rahmen von Eingabefeldern und Filter-Chips (3.8:1 auf white, 3.6:1 auf soft-surface — line-gray erreicht für Bedienelemente nur 1.3:1). */
+  --error: #a32c3c; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Fehlertext und Fehlerrahmen in Formularen und Notices, auf white (7.0:1) und error-surface (6.2:1). Immer mit Wort oder Icon, nie nur Farbe. */
+  --error-surface: #fbecee; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Fläche der Fehler-Notice. */
+  --success: #2e6b43; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Erfolgsmeldungen, Titel der Erfolgs-Notice, auf success-surface (5.6:1). Immer mit Wort oder Icon, nie nur Farbe. */
+  --success-surface: #e9f4ec; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Fläche der Erfolgs-Notice. */
+  --shadow-float: 0 12px 32px rgba(16, 76, 93, 0.14); /* Ergänzt (22.10.2026). Schwebende Karten: Vertrauenskarte am Kopfbild der Startseite (TrustBar trust-card) und Cookie-Hinweis (CookieNotice). Deep Teal mit 14 % Deckkraft. */
+}
+:root {
+  --space-1: 4px; /* Kleinste Abstände, z. B. Icon-Feinjustierung. Nicht im Manual beziffert — ergänzt, konsistent mit dem 4–6 px Button-Radius. */
+  --space-2: 8px; /* Abstand zwischen Icon und Label in einem Button. Ergänzt. */
+  --space-3: 12px; /* Unterer Wert für den Abstand zwischen CTA-Buttons (Manual: 12–16 px zwischen Actions). */
+  --space-4: 16px; /* Oberer Wert für den Abstand zwischen CTA-Buttons (Manual: 12–16 px); ergänzt als Standard-Innenabstand für Buttons und Karten. */
+  --space-5: 24px; /* Abstand zwischen verwandten Inhaltsblöcken. Ergänzt. */
+  --space-6: 32px; /* Abstand zwischen Karten oder Sektionen innerhalb eines Panels. Ergänzt. */
+  --space-7: 48px; /* Abstand zwischen grösseren Seitenabschnitten. Ergänzt. */
+  --space-8: 64px; /* Grosse Seitenabstände, Hero-Innenabstand. Ergänzt. */
+  --space-9: 96px; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Sektionsabstand ab 992 px Viewport. */
+  --radius-button: 6px; /* Buttons. Manual nennt 4–6 px; 6 px als oberer Wert verwendet. */
+  --radius-card: 16px; /* Karten und Content-Boxen. Im Manual nicht beziffert — visuell aus den Layout-Folien abgeleitet, keine geprüfte Exaktangabe. */
+  --container-sm: 720px; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Lesespalte: RichText, Formulare, rechtliche Seiten. */
+  --container-md: 960px; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Artikel, FAQ, Code und Tabellen. */
+  --container-lg: 1200px; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Standardbreite aller Sektionen. */
+  --container-xl: 1440px; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Breite Bänder, z. B. Logo-Liste. */
+  --grid-gutter: 32px; /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Spaltenabstand im Raster ab 992 px (darunter space-5). */
+  --bp-sm: 576px; /* Ergänzt – nicht im Manual belegt. Breakpoint: grosse Smartphones quer. In Media Queries als Zahl schreiben. Siehe Abschnitt Responsive. */
+  --bp-md: 768px; /* Ergänzt – nicht im Manual belegt. Breakpoint: Tablet hochkant. Siehe Abschnitt Responsive. */
+  --bp-lg: 992px; /* Ergänzt – nicht im Manual belegt. Breakpoint: Desktop-Navigation, grössere Abstände. Siehe Abschnitt Responsive. */
+  --bp-xl: 1200px; /* Ergänzt – nicht im Manual belegt. Breakpoint: dreispaltiges Standardraster. Siehe Abschnitt Responsive. */
+  --font-sans: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-office: Calibri, Carlito, "Segoe UI", sans-serif;
+  --text-hero-h1: 900 56px/1.05 var(--font-sans); /* Ausschliesslich für die dreizeilige Hero-Kernbotschaft. Zeile 2 in growth-peach, Zeile 1 und 3 in white (auf deep-teal) bzw. deep-teal (auf hellem Grund). Jede Zeile beginnt mit Grossbuchstaben und endet mit einem Punkt. */
+  --text-h2: 900 36px/1.10 var(--font-sans); /* Seiten- und Abschnittstitel. Farbe deep-teal auf hellen Flächen. */
+  --text-h3: 700 24px/1.20 var(--font-sans); /* Unterüberschriften, Kartentitel. Farbe deep-teal auf hellen Flächen. */
+  --text-h4: 700 18px/1.30 var(--font-sans); /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Kleinste Überschrift: Titel in IconText-Karten, gruppierten Teamlisten. Farbe deep-teal. */
+  --text-fact: 900 42px/1.05 var(--font-sans); /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Wert in FactList (Desktop; Metrics-Variante 56px). Farbe deep-teal. Nur verifizierte Werte. */
+  --text-lead: 700 20px/1.35 var(--font-sans); /* Subline direkt unter der Kernbotschaft. Farbe white auf deep-teal, body-ink auf hellen Flächen. */
+  --text-body: 400 16px/1.55 var(--font-sans); /* Lauftext und Bildunterschriften. Farbe white auf deep-teal, body-ink auf hellen Flächen. */
+  --text-nav-button: 700 16px/1.20 var(--font-sans); /* Navigation und Button-Label. Manual nennt 14–16 px; 16 px als Standardgrösse, 14 px in dichter Navigation. Farbe kontextabhängig (siehe Button-Komponente). */
+  --text-caption: 400 13px/1.35 var(--font-sans); /* Meta-Text, Zeitstempel, kleine Bildunterschriften. Manual nennt 12–13 px. Gedämpfte Farbe (body-ink oder white mit reduzierter Deckkraft). */
+  --text-eyebrow: 700 14px/1.35 var(--font-sans); /* Ergänzt – nicht im Manual belegt (aus der früheren Pattern Library abgeleitet, an Deep Teal angepasst). Kicker über Überschriften, in Grossbuchstaben. deep-teal auf hellem Grund, growth-peach auf deep-teal/dark-teal (ersetzt das frühere Gold). 14 px seit 22.10.2026; in Karten (Teaser, Paketvergleich) 12 px. */
+}
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+/* Intersys Design System: components/bundle.css */
+/* Intersys — Komponenten-Stylesheet.
+   Liest ausschliesslich Tokens aus tokens.json (als CSS-Variablen aus tokens.css);
+   Transparenzen entstehen mit color-mix() aus Tokens, nie mit eigenen Farbwerten.
+   Adaptiert aus der früheren Intersys Pattern Library (Intersys Blue / Gold)
+   auf das Markenmanual 2026 (Deep Teal / Growth Peach). */
+/* ---------- Basis ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-family: var(--font-sans); color: var(--body-ink); background: var(--white); }
+body { margin: 0; font-size: 16px; line-height: 1.55; }
+h1, h2, h3, h4, p, figure, blockquote, dl { margin: 0; }
+h1, h2, h3, h4 { color: var(--deep-teal); overflow-wrap: anywhere; text-wrap: balance; }
+h1 { font-size: clamp(40px, 5vw, 56px); font-weight: 900; line-height: 1.05; }
+h2 { font-size: clamp(28px, 3.2vw, 36px); font-weight: 900; line-height: 1.1; }
+h3 { font-size: 24px; font-weight: 700; line-height: 1.2; }
+h4 { font-size: 18px; font-weight: 700; line-height: 1.3; }
+p, li, dd, a, label, figcaption { overflow-wrap: anywhere; }
+p { text-wrap: pretty; }
+a { color: var(--deep-teal); text-underline-offset: 0.2em; }
+a:hover { color: var(--dark-teal); text-decoration-thickness: 2px; }
+img { display: block; max-width: 100%; height: auto; }
+button, input, select, textarea { font: inherit; max-width: 100%; }
+button, summary { cursor: pointer; }
+:disabled { cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--deep-teal); outline-offset: 3px; }
+address { font-style: normal; }
+small, figcaption { font-size: 13px; line-height: 1.35; }
+::selection { background: var(--peach-surface); color: var(--body-ink); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip-link { position: fixed; z-index: 100; top: var(--space-3); left: var(--space-3); padding: var(--space-3) var(--space-4); color: var(--white); background: var(--dark-teal); transform: translateY(-200%); }
+.skip-link:focus { transform: none; color: var(--white); }
+/* ---------- Layout ---------- */
+.container { width: 100%; max-width: var(--container-lg); margin-inline: auto; padding-inline: var(--space-4); }
+.container--narrow { max-width: var(--container-sm); }
+@media (min-width: 992px) {
+  .container { padding-inline: var(--space-6); }
+}
+/* ---------- Text-Bausteine ---------- */
+.eyebrow { display: block; color: var(--deep-teal); font-size: 14px; line-height: 1.35; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.meta { font-size: 13px; color: var(--ink-muted); }
+/* ---------- Button ---------- */
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: 52px; padding: 0 var(--space-4);
+  border: 1px solid var(--deep-teal); border-radius: var(--radius-button);
+  font-size: 16px; font-weight: 700; line-height: 1.2; text-decoration: none; text-align: center; white-space: nowrap;
+  color: var(--white); background: var(--deep-teal);
+  transition: background 200ms ease, color 200ms ease;
+}
+.button:hover { color: var(--white); background: var(--dark-teal); border-color: var(--dark-teal); }
+.button--white { color: var(--deep-teal); background: var(--white); border-color: var(--line-gray); }
+.button--white:hover { color: var(--deep-teal); background: var(--soft-surface); border-color: var(--line-gray); }
+.button--outline { color: var(--deep-teal); background: transparent; }
+.button--outline:hover { color: var(--deep-teal); background: var(--teal-surface); border-color: var(--deep-teal); }
+.button:disabled, .button[aria-disabled="true"] { color: var(--ink-muted); background: var(--soft-surface); border-color: var(--line-gray); }
+/* ---------- Card (Basis) ---------- */
+.card { padding: var(--space-5); border-radius: var(--radius-card); background: var(--soft-surface); border: 1px solid var(--line-gray); color: var(--body-ink); }
+.card h3 { margin-bottom: var(--space-2); }
+/* ---------- Tag ---------- */
+.tag-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.tag { display: inline-flex; align-items: center; min-height: 28px; padding: 0 var(--space-3); border-radius: var(--radius-button); background: var(--teal-surface); color: var(--deep-teal); font-size: 13px; font-weight: 700; text-decoration: none; }
+a.tag:hover { background: var(--deep-teal); color: var(--white); }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll table { min-width: 560px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+caption { text-align: left; font-weight: 700; padding-bottom: var(--space-4); color: var(--body-ink); }
+th, td { padding: var(--space-4); border-bottom: 1px solid var(--line-gray); vertical-align: top; }
+thead th { background: var(--teal-surface); color: var(--deep-teal); }
+tbody th { color: var(--deep-teal); }
+/* ---------- Formulare ---------- */
+.form { display: grid; gap: var(--space-5); }
+.form > fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.form legend { margin-bottom: var(--space-5); font-weight: 700; color: var(--body-ink); }
+.form-field { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.form-field label { font-weight: 700; color: var(--body-ink); }
+.form-field :is(input, select, textarea) { width: 100%; min-height: 48px; padding: var(--space-3); color: var(--body-ink); background: var(--white); border: 1px solid var(--control-border); border-radius: var(--radius-button); }
+.form-field :is(input, select, textarea):hover { border-color: var(--deep-teal); }
+.form-field :is(input, select, textarea):focus-visible { outline: 2px solid var(--deep-teal); outline-offset: 1px; border-color: var(--deep-teal); }
+.form-field textarea { min-height: 160px; resize: vertical; }
+.form-field input[type="file"] { font-size: 14px; }
+.form-field input::file-selector-button { font: inherit; min-height: 36px; margin-right: var(--space-3); padding: 0 var(--space-3); border: 1px solid var(--deep-teal); border-radius: var(--radius-button); background: var(--white); color: var(--deep-teal); font-weight: 700; }
+.form-field [aria-invalid="true"] { border-color: var(--error); border-width: 2px; }
+.form-field__error { font-size: 14px; font-weight: 700; color: var(--error); }
+.form-field__hint { font-size: 14px; color: var(--ink-muted); }
+.form-field :disabled { color: var(--ink-muted); background: var(--soft-surface); border-color: var(--line-gray); }
+.check-field { display: flex; align-items: flex-start; gap: var(--space-3); min-height: 44px; }
+.check-field input { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 2px; accent-color: var(--deep-teal); }
+/* ---------- Filter ---------- */
+.filters fieldset { margin: 0; padding: 0; border: 0; }
+.filters legend { margin-bottom: var(--space-3); font-size: 14px; font-weight: 700; color: var(--deep-teal); }
+.filter-option { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4); border: 1px solid var(--control-border); border-radius: var(--radius-button); background: var(--white); color: var(--body-ink); cursor: pointer; }
+.filter-option:hover { border-color: var(--deep-teal); }
+.filter-option:has(:checked) { color: var(--white); background: var(--deep-teal); border-color: var(--deep-teal); }
+.filter-option input { accent-color: var(--white); }
+.filters fieldset:disabled .filter-option { color: var(--ink-muted); background: var(--soft-surface); border-color: var(--line-gray); cursor: not-allowed; }
+/* ---------- Notice & Empty State ---------- */
+.notice { padding: var(--space-5); border: 1px solid var(--growth-peach); border-radius: var(--radius-card); background: var(--peach-surface); color: var(--body-ink); }
+.notice > * + * { margin-top: var(--space-2); }
+.notice--error { border-color: var(--error); background: var(--error-surface); }
+.notice--error strong { color: var(--error); }
+.notice--success { border-color: var(--success); background: var(--success-surface); }
+.notice--success strong { color: var(--success); }
+.notice a { color: inherit; }
+.empty-state { padding: var(--space-7) var(--space-5); border: 1px dashed var(--control-border); border-radius: var(--radius-card); background: var(--soft-surface); color: var(--ink-muted); text-align: center; }
+/* ---------- Responsive: Buttons brechen auf schmalen Geräten um ---------- */
+@media (max-width: 575px) {
+  .button { white-space: normal; padding-block: var(--space-2); }
+}
+.form[aria-busy="true"] { cursor: progress; }
+.form[aria-busy="true"] [type="submit"] { opacity: 0.6; }
+.notice ul { margin: 0; padding-left: var(--space-5); }

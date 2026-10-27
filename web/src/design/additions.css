@@ -1,0 +1,32 @@
+/* Eigene Ergänzungen zum Intersys Design System. Nur Tokens verwenden, jeden Eintrag begründen
+   und neue Muster als Rückmeldung ans Design System melden (docs/agents/open-items.md). */
+
+/* Roboto selbst gehostet (variable Schrift, Gewichte 100–900, lateinischer Zeichensatz), übernommen von
+   intersys.ch, bis der Design-System-Export die Schriftdateien liefert. Kein Request an Google Fonts. */
+@font-face {
+  font-family: Roboto;
+  src: url('./assets/roboto-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* Ampel der Verkehrslage auf der Karte. Das Design System hat keine Skala für Datenvisualisierung;
+     Fehler- und Erfolgsfarbe tragen Stau und flüssigen Verkehr, «Keine Daten» ist neutral. */
+  --traffic-jam: var(--error);
+  --traffic-free: var(--success);
+  --traffic-nodata: var(--control-border);
+  /* Kein Orange im Design System, Peach ist dem Wachstumsclaim vorbehalten und auf grauen Kartenkacheln
+     zu hell. Darum ein eigener Wert zwischen Fehler und Erfolg; als Rückmeldung ans Design System gemeldet. */
+  --traffic-slow: #c76a12;
+
+  /* Feste Breite der Seitenleiste neben der Karte. Kein Container-Token passt, weil die Karte den Rest füllt. */
+  --sidebar-width: 400px;
+
+  /* Mindestgrösse von Klickflächen laut Briefing für interne Tools. Das Design System nennt 44 px nur
+     implizit in einzelnen Komponenten; dichte Listen in der Seitenleiste brauchen den unteren Wert. */
+  --target-min: 40px;
+}

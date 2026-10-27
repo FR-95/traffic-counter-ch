@@ -7,7 +7,7 @@ Inspiriert von [m-cirkovic/Open-Data_ASTRA](https://github.com/m-cirkovic/Open-D
 ## Aufbau
 
 - `server/` – Node + Hono. Fragt die SOAP-API zentral ab (Messwerte jede Minute, Messstellen alle 6 h), wandelt das XML in kompaktes JSON und liefert im Produktivbetrieb auch das Frontend aus. Der API-Key bleibt auf dem Server.
-- `web/` – React + Vite + Leaflet. Holt `/api/counters` einmal und `/api/measurements` alle 30 s.
+- `web/` – React + Vite + Leaflet. Holt `/api/counters` einmal und `/api/measurements` alle 30 s. Die Gestaltung folgt dem Intersys Design System: `web/src/design/intersys.css` wird mit `npm run ds:sync -w web -- <pfad/zu/intersys.css>` erzeugt, Details in [docs/agents/design.md](docs/agents/design.md).
 - `server/data/astra-sensors.json` – exakte Sensorstandorte, Namen und Zielorte der ASTRA-Zählstellen aus dem öffentlichen Feature-Service hinter dem [SVZ-Dashboard](https://www.arcgis.com/apps/dashboards/1673b262537546098589ad3820e5ece2) (Verknüpfung über `SiteReferenceID` = Fahrstreifen-ID). Aktualisieren: `npm run build:sensors -w server`.
 - `server/data/tmc-locations.json` – Fallback für Zählstellen ohne Sensordaten (Kantone): Ortsnamen und Referenzpunkte aus der offiziellen [TMC-Ortstabelle](https://data.opentransportdata.swiss/dataset/rds-tmc) (derzeit Version 7.5); Position = TMC-Punkt plus Offset. Neue Version: ZIP herunterladen, entpacken, `npm run build:tmc -w server -- <ordner>`.
 - Quelle und Betreiber werden aus dem Präfix der Zählstellen-ID abgeleitet (`[Betreiber.]Kanton.CH:Nummer`): `CH:0542` → Bund/ASTRA, `ZH.CH:0088` → Kanton Zürich, `FH.FR.CH:0001` → Kanton Freiburg/Betreiber „FH“. In der Seitenleiste lassen sich die Gruppen ein- und ausblenden und aufklappen.

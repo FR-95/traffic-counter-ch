@@ -2,6 +2,7 @@ import type { LatLngBoundsExpression } from 'leaflet';
 import { useEffect, useRef } from 'react';
 import { CircleMarker, LayersControl, MapContainer, TileLayer, Tooltip, useMap, type TileLayerProps } from 'react-leaflet';
 import type { Counter, CounterValues } from '../../server/src/types.ts';
+import { token } from './design/tokens.ts';
 import { laneLabel, markerRadius, STATUSES, type Status } from './traffic.ts';
 
 export interface MapCounter {
@@ -104,9 +105,9 @@ export function TrafficMap({ counters, selected, focus, onSelect, onTileHealth }
             center={[counter.lat, counter.lng]}
             radius={markerRadius(values?.flow)}
             pathOptions={{
-              color: isSelected ? '#000' : '#fff',
+              color: token(isSelected ? '--dark-teal' : '--white'),
               weight: isSelected ? 3 : 1,
-              fillColor: STATUSES[status].color,
+              fillColor: token(STATUSES[status].token),
               fillOpacity: 0.85,
             }}
             eventHandlers={{ click: () => onSelect(counter.id) }}
@@ -126,7 +127,7 @@ export function TrafficMap({ counters, selected, focus, onSelect, onTileHealth }
             key={lane.id}
             center={[lane.lat!, lane.lng!]}
             radius={4}
-            pathOptions={{ color: '#fff', weight: 1, fillColor: '#1f4bd8', fillOpacity: 1 }}
+            pathOptions={{ color: token('--white'), weight: 1, fillColor: token('--deep-teal'), fillOpacity: 1 }}
           >
             <Tooltip>
               {laneLabel(lane)}
