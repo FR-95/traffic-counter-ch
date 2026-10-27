@@ -1,0 +1,20 @@
+# Changelog
+
+Änderungen, die Nutzer oder Betrieb bemerken. Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach [Semantic Versioning](https://semver.org/lang/de/).
+
+## [Unveröffentlicht]
+
+### Hinzugefügt
+
+- Live-Karte der Zählstellen mit Fahrzeugen/h und Ø km/h. Der Server fragt opentransportdata.swiss (DATEX II) zentral ab, der API-Key bleibt auf dem Server.
+- Positionen aus der offiziellen TMC-Ortstabelle 7.5 (Punkt plus Offset). Ein- und Ausfahrten werden getrennt von der Hauptfahrbahn aggregiert.
+- Exakte Sensorstandorte, Namen und Zielorte der ASTRA-Zählstellen. Dazu eine Suche nach Zählstellen.
+- Disk-Cache für die letzten API-Antworten. Ein Neustart ohne API-Verbindung zeigt dadurch weiterhin Daten.
+- `GET /api/health` mit Status pro Datenquelle. Das UI meldet Ausfälle verständlich und zeigt den Stand der angezeigten Daten.
+- Seitenleiste mit Gruppen nach Quelle (Bund/Kanton) und Betreiber. Gruppen lassen sich ein- und ausblenden und aufklappen.
+- Leerzustand, wenn die Suche keine Zählstelle findet.
+
+### Geändert
+
+- Gestaltung nach dem Intersys Design System: Kopfleiste in Deep Teal mit Logo, Roboto (selbst gehostet), Karten, Notices und Tabellen aus dem Design System, Ampelfarben der Karte aus Tokens, Klickflächen von mindestens 40 px und Sie-Form.
+- Die Suche hat ein sichtbares Label und einen Hinweis statt eines Platzhaltertexts.
