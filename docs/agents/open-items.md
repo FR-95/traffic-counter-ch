@@ -51,10 +51,85 @@ Entscheid vom 2026-10-27, siehe unten. Das Wörterbuch `web/src/i18n/de.ts` best
 - **Selbst gehostete Kacheln prüfen**, sobald das Hosting entschieden ist: PMTiles-Ausschnitt der Schweiz (Grösse messen, z. B. bis Zoom 14) statt swisstopo-Kacheln. Entfernt die Drittanfrage und die CSP-Ausnahme.
 - **Auf echtem Touch-Gerät testen:** Zwei-Finger-Geste und Hinweis auf Deep Teal (bisher nur im Desktop-Browser geprüft).
 
+### Verkehrslage-Logik
+
+Abgleich mit der Vorgänger-App (Angular, Handover «Verkehrslage-Logik» vom 27.10.2026). Dort löste ein einzelner km/h-Wert irgendeiner Spur und Fahrzeugklasse den Status aus, «Stockend» wurde vor «Stau» geprüft, eine defekte Spur machte die ganze Stelle «fehlerhaft», und Fehler und Normal waren beide blau. Diese Punkte sind bei uns bereits gelöst:
+
+- Flussgewichtetes Mittel pro Fahrtrichtung, die langsamere Richtung entscheidet.
+- Priorität Stau > Stockend > Flüssig.
+- Ausgefallene Spuren fallen weg, der Teilausfall ist sichtbar (gestrichelter Ring).
+- «Keine Daten» nur, wenn keine gültige Spur übrig ist.
+- Eigene Form für «Keine Daten».
+
+Massgebende Definition (Recherche 27.10.2026): ASTRA und BFS definieren Stau und stockenden Verkehr gleich. Auf diese Definition stützt sich auch die ASTRA-Staustatistik. Sie beruht auf den Verkehrsmeldungen von Viasuisse.
+
+- **Ausserorts (Hochleistungs- und Hauptstrassen):**
+  - Stau: Fahrzeuggeschwindigkeit mindestens 1 Minute unter 10 km/h, häufig Stillstand.
+  - Stockend: mindestens 1 Minute unter 30 km/h und/oder teilweise kurzer Stillstand.
+- **Innerorts (Hauptstrassen):** Stau, wenn die Warte- bzw. Verlustzeit an Knoten oder Engpässen mindestens 5 Minuten beträgt. Eine Zählstelle misst das nicht.
+
+Quellen:
+
+- [BFS, Definition Stau](https://www.bfs.admin.ch/asset/de/8288664)
+- [ASTRA, Definitionen](https://www.astra.admin.ch/de/definitionen)
+- [BFS MONET 2030, Staubelastung](https://www.bfs.admin.ch/bfs/de/home/statistiken/nachhaltige-entwicklung/monet-2030/indikatoren/staubelastung-nationalstrassennetz.html)
+
+Zum Vergleich, nicht übernehmen:
+
+- ADAC (Deutschland, Sekundärquelle): Stau unter 20 km/h während 5 Minuten auf mindestens 1 km, stockend 20–40 km/h.
+- DATEX II `TrafficStatusEnum` (`freeFlow`, `heavy`, `congested`, `impossible`) hat keine Zahlenwerte.
+- ASTRA-Monitoring «Zielgeschwindigkeit» (signalisiert −10/−20 km/h) und ARE-Staukosten (< 65 % der Referenzgeschwindigkeit) dienen Jahresstatistiken, nicht der Lage in Echtzeit.
+
+Unsere Schwellen von 10 und 30 km/h entsprechen der ASTRA-Definition für ausserorts. Eine eigene Interpretation ist nur für die Fragen nötig, die die Definition offenlässt.
+
+Offen, jeweils mit Empfehlung (★). Messung vom 27.10.2026, 17:51: 51 Störungen, davon 20 an Zählstellen des Kantons Zürich.
+
+- **Linie festlegen:** Entschieden am 27.10.2026, siehe «Entscheide». Noch offen ist die Umsetzung: in Info-Panel und Legende mit Quelle nennen («nach Definition ASTRA»).
+- **Mindestverkehr** (Entscheid offen): Flüsse sind Minutenwerte mal 60, 60 Fz/h heisst also *ein* Fahrzeug. Darum stand z. B. «Starrkirch, Stau, 5 km/h» mit 60 Fz/h zuoberst in der Störungsliste; 4 der 51 Störungen beruhten auf einem einzigen Fahrzeug. ASTRA verlangt «häufig Stillstand» des Verkehrs, ein einzelnes Fahrzeug belegt das nicht. Der Mindestfluss ist darum ein Filter für die Datenqualität und keine abweichende Definition.
+  - ★ A: Stau und Stockend erst ab einem Mindestfluss der langsameren Richtung (z. B. 180 Fz/h = 3 Fz/min). Darunter gilt «Flüssig».
+  - B: Eigene Stufe «Wenig Verkehr».
+  - C: Kein Mindestfluss.
+- **Zeitliche Glättung** (Entscheid offen): ASTRA verlangt «mindestens 1 Minute», unsere Minutenwerte erfüllen das schon. Ein Mittel über mehrere Minuten würde kurze Staus unterschlagen, die ASTRA mitzählt.
+  - ★ A: Eintritt wie ASTRA nach der letzten Minute. Austritt erst nach z. B. 2 Minuten über der Schwelle (Hysterese), damit die Karte nicht flackert. Der Server hält dafür die letzten Abrufe im Speicher, ohne zusätzliche API-Abrufe.
+  - B: Flussgewichtetes Mittel über 3–5 Minuten (weicht von ASTRA ab).
+  - C: Keine Glättung.
+- **Innerorts** (Entscheid offen): Die ASTRA-Schwellen gelten nur ausserorts. Innerorts zählt die Verlustzeit von 5 Minuten, und die misst keine Zählstelle. An Lichtsignalen (viele kantonale Zählstellen, z. B. in der Stadt Zürich) zeigt eine Minute oft nur die Rotphase.
+  - **Unterscheidung** (Auswertung TMC 7.5 vom 27.10.2026):
+    - Die Zählstellen-ID nennt nur den Betreiber (`CH:` ASTRA, `ZH.CH:` Kanton Zürich usw.), nicht den Strassentyp. ASTRA zählt auch auf Hauptstrassen, z. B. Simplon und Klausenpass.
+    - Die TMC-Ortstabelle liefert die Strassenklasse: L1.1 Autobahn (345 Zählstellen), L1.2 Hauptstrasse (144), L1.3/L1.4 Neben- und Verbindungsstrassen (290), L5.0 Stadtstrasse (34), ohne TMC-Bezug 80 (66 davon Kanton Zürich).
+    - Das TMC-Feld `URBAN` ist überall 0 und taugt darum nicht.
+    - Liegt der TMC-Bezugspunkt an einem Knoten (Kreuzung, Kreisel), deutet das auf «bei Knoten» im Sinn der ASTRA-Definition.
+    - Zum Vergleich die Störungen am 27.10.2026, 18:05: 14 auf Autobahnen, 26 auf anderen Strassen.
+  - ★ A: Strassenklasse aus TMC beim Build übernehmen. Autobahn (L1.1) nach ASTRA ausserorts (1 Minute). Stadtstrasse (L5.0) und Knoten auf anderen Strassen nach der Innerorts-Regel: Stau oder Stockend erst, wenn die Schwelle 5 Minuten am Stück unterschritten ist. Hauptstrassen und übrige Strassen vorläufig wie ausserorts. Zählstellen ohne TMC-Bezug ebenfalls wie ausserorts, mit Hinweis.
+  - B: Wie A, aber alle Nicht-Autobahnen nach der Innerorts-Regel. Vorsichtiger, unterschlägt aber kurze Staus ausserorts.
+  - C: Innerorts genau bestimmen, z. B. über die signalisierte Höchstgeschwindigkeit (OpenStreetMap `maxspeed`, ODbL, mit Quellenangabe) oder über Verkehrsnetz CH (VnCH); ob VnCH ein solches Attribut hat, ist noch zu prüfen. Grösserer Aufwand, dafür genauer.
+- **Plausibilität:** Unplausible Werte serverseitig verwerfen und in den Details als Messfehler zeigen, z. B. > 200 km/h, Fluss pro Spur > 3000 Fz/h oder km/h > 0 bei 0 Fz/h. Das ist Voraussetzung für Top-Listen und Statistiken. Grenzwerte zum Entscheid.
+- **Legende aus den Konstanten erzeugen:** `de.traffic.threshold` enthält 10 und 30 km/h als festen Text, getrennt von `JAM_BELOW_KMH`/`SLOW_BELOW_KMH` in `web/src/traffic.ts`. Besser als Funktion mit Parameter. Ohne Entscheid umsetzbar.
+
+### Funktionen aus der Vorgänger-App
+
+Die Reihenfolge entspricht der Empfehlung. Jeder Punkt braucht einen Entscheid.
+
+1. **Stand-Badge auf der Karte** (S): Zeit des Datenstands unten rechts, mit eigener Farbe, wenn die Daten veraltet sind. Auf Mobil ist der Stand heute neben der Karte nicht sichtbar.
+2. **Info-Panel** (S): Was die Karte zeigt, wie aktuell und genau sie ist, Datenquelle, Betreiber, Impressum. Den Inhalt liefert der Projektinhaber.
+3. **Überblick mit Kennzahlen und Top-Listen** (M, nach der Plausibilitätsprüfung): Anzahl Zählstellen, Fahrzeuge/h gesamt (Summe der Querschnitte), langsamste Zählstellen, höchster Verkehrsfluss. Der Server rechnet die Kennzahlen. Top-Listen werden einmal pro Zählstelle gebildet und sortiert; in der Vorgänger-App waren Werte und Orte getrennt sortiert und falsch gepaart. Ob eine Liste der höchsten Geschwindigkeiten («Raser») öffentlich gezeigt wird, ist eine Produktfrage.
+4. **Fahrtrichtungen auf der Karte** (M): Ab Zoom 13 je ein Halbkreis oder Punkt pro Richtung, mit Zielort im Tooltip. Ein Stau in nur einer Richtung wird dadurch direkt sichtbar.
+5. **Fahrstreifen-Grafik in den Details** (M): Balken pro Spur, Personenwagen und Lastwagen gestapelt, ohne Animation, mit Text als Alternative.
+6. **Rückblick** (L, nach dem Hosting-Entscheid): opentransportdata.swiss liefert nur aktuelle Werte, wir müssten also selbst speichern. Offen sind Speicherort, Aufbewahrungsdauer und eine Zeitachse im UI. Davon würden auch die Glättung und die Schwellen relativ zur üblichen Geschwindigkeit profitieren.
+
+Nicht übernehmen:
+
+- Cluster mit Anzahl, weil sie die Lage verdecken.
+- Popup plus Detail-Modal (zwei Klicks).
+- «Alle Marker löschen».
+- Einheitliches Blau für alle Marker.
+- Symbolleiste nur mit Icons.
+
 ## Entscheide
 
 | Datum | Entscheid | Grund |
 | --- | --- | --- |
+| 2026-10-27 | Für Stau und stockenden Verkehr gilt die Definition von ASTRA/BFS. Ausserorts: Stau unter 10 km/h, stockend unter 30 km/h, jeweils mindestens 1 Minute. Innerorts: Stau bei mindestens 5 Minuten Verlustzeit an Knoten. Eigene Regeln nur, wo die Definition Lücken lässt (Mindestverkehr, Innerorts-Näherung). | Offizielle und einheitliche Linie für die Schweiz; auch die ASTRA-Staustatistik und Viasuisse folgen ihr. Entscheid des Projektinhabers im Chat. |
 | 2026-10-27 | Teilausfälle (Variante A von drei): Lage aus den übrigen Fahrstreifen, dazu gestrichelter Ring auf der Karte und «x von y Fahrstreifen ohne Daten» in Tooltip und Details. Verworfen: «Keine Daten» bei Ausfall einer ganzen Fahrtrichtung (B), Hinweis nur in den Details (C). | Teilausfälle waren auf der Karte unsichtbar; ein Stau in der ausgefallenen Richtung blieb verborgen (27.10.2026: 38 Zählstellen, 19 mit ganzer Richtung). |
 | 2026-10-27 | Verkehrslage nach der langsameren Fahrtrichtung (`worstSpeed`), nicht nach dem Durchschnitt beider Richtungen. | Der Durchschnitt verdeckte Staus in nur einer Richtung (z. B. 8 km/h und 60 km/h → Ø 19 km/h, «Stockend»). Aus der UI/UX-Review; Umsetzung freigegeben. |
 | 2026-10-27 | UI/UX-Review umgesetzt: Ampel mit Helligkeits- und Formunterschieden, Details oben mit Fokusführung, Liste «Aktuelle Störungen», «Quelle und Betreiber» zugeklappt, Auswahl in der URL. | Stau und Flüssig waren bei Rot-Grün-Schwäche ununterscheidbar (Kontrast 1,11:1), Störungen gingen zwischen flüssigen Zählstellen unter, Details erschienen ausserhalb des Sichtbereichs. |
