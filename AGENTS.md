@@ -69,6 +69,7 @@ Diese Dokumente werden nicht automatisch geladen. Lies sie, bevor du am jeweilig
   - `docs/agents/open-items.md`, wenn ein Punkt erledigt ist oder neu dazukommt.
 - **Entscheide** mit Datum, Variante und Grund in [docs/agents/open-items.md](docs/agents/open-items.md) festhalten. Das gilt auch für Entscheide aus dem Chat.
 - **Kleine, vollständige Änderungen:** keine Nebenbaustellen, aber selbst verursachte Fehler beheben.
+- **Commits vorschlagen:** Nach jeder abgeschlossenen Aufgabe, nach bestandenen Prüfbefehlen, fragen oder vorschlagen, ob committet werden soll. Dazu die Änderungen kurz zusammenfassen und die geplante Aufteilung samt Commit-Messages nennen. Nie ungefragt committen, und nie pushen. Offene, unzusammenhängende Änderungen (z. B. `package-lock.json`) getrennt ansprechen.
 
 ## Repository, CI/CD und Deployment
 
