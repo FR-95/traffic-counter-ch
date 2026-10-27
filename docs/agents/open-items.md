@@ -82,29 +82,23 @@ Zum Vergleich, nicht übernehmen:
 
 Unsere Schwellen von 10 und 30 km/h entsprechen der ASTRA-Definition für ausserorts. Eine eigene Interpretation ist nur für die Fragen nötig, die die Definition offenlässt.
 
-Offen, jeweils mit Empfehlung (★). Messung vom 27.10.2026, 17:51: 51 Störungen, davon 20 an Zählstellen des Kantons Zürich.
+Umgesetzt am 27.10.2026, siehe «Entscheide»: Mindestverkehr (Variante A, 180 Fz/h) und Innerorts-Regel (Variante A). Die Lage berechnet der Server (`server/src/congestion.ts`). Die Strassenklasse stammt aus der TMC-Ortstabelle; ausgewertet wurde TMC 7.5:
 
-- **Linie festlegen:** Entschieden am 27.10.2026, siehe «Entscheide». Noch offen ist die Umsetzung: in Info-Panel und Legende mit Quelle nennen («nach Definition ASTRA»).
-- **Mindestverkehr** (Entscheid offen): Flüsse sind Minutenwerte mal 60, 60 Fz/h heisst also *ein* Fahrzeug. Darum stand z. B. «Starrkirch, Stau, 5 km/h» mit 60 Fz/h zuoberst in der Störungsliste; 4 der 51 Störungen beruhten auf einem einzigen Fahrzeug. ASTRA verlangt «häufig Stillstand» des Verkehrs, ein einzelnes Fahrzeug belegt das nicht. Der Mindestfluss ist darum ein Filter für die Datenqualität und keine abweichende Definition.
-  - ★ A: Stau und Stockend erst ab einem Mindestfluss der langsameren Richtung (z. B. 180 Fz/h = 3 Fz/min). Darunter gilt «Flüssig».
-  - B: Eigene Stufe «Wenig Verkehr».
-  - C: Kein Mindestfluss.
+- Die Zählstellen-ID nennt nur den Betreiber (`CH:` ASTRA, `ZH.CH:` Kanton Zürich usw.), nicht den Strassentyp.
+- Das TMC-Feld `URBAN` ist überall 0 und taugt darum nicht.
+- Zählstellen ohne TMC-Bezug haben `area: null` und werden wie ausserorts beurteilt.
+
+Offen, jeweils mit Empfehlung (★):
+
+- **Quelle nennen:** Im Info-Panel auf die ASTRA-Definition verweisen, mit Link. Die Legende nennt sie schon.
 - **Zeitliche Glättung** (Entscheid offen): ASTRA verlangt «mindestens 1 Minute», unsere Minutenwerte erfüllen das schon. Ein Mittel über mehrere Minuten würde kurze Staus unterschlagen, die ASTRA mitzählt.
-  - ★ A: Eintritt wie ASTRA nach der letzten Minute. Austritt erst nach z. B. 2 Minuten über der Schwelle (Hysterese), damit die Karte nicht flackert. Der Server hält dafür die letzten Abrufe im Speicher, ohne zusätzliche API-Abrufe.
+  - ★ A: Eintritt wie ASTRA nach der letzten Minute, Austritt erst nach z. B. 2 Minuten über der Schwelle (Hysterese), damit die Karte nicht flackert. Den Verlauf hält der Server schon für die Innerorts-Regel.
   - B: Flussgewichtetes Mittel über 3–5 Minuten (weicht von ASTRA ab).
   - C: Keine Glättung.
-- **Innerorts** (Entscheid offen): Die ASTRA-Schwellen gelten nur ausserorts. Innerorts zählt die Verlustzeit von 5 Minuten, und die misst keine Zählstelle. An Lichtsignalen (viele kantonale Zählstellen, z. B. in der Stadt Zürich) zeigt eine Minute oft nur die Rotphase.
-  - **Unterscheidung** (Auswertung TMC 7.5 vom 27.10.2026):
-    - Die Zählstellen-ID nennt nur den Betreiber (`CH:` ASTRA, `ZH.CH:` Kanton Zürich usw.), nicht den Strassentyp. ASTRA zählt auch auf Hauptstrassen, z. B. Simplon und Klausenpass.
-    - Die TMC-Ortstabelle liefert die Strassenklasse: L1.1 Autobahn (345 Zählstellen), L1.2 Hauptstrasse (144), L1.3/L1.4 Neben- und Verbindungsstrassen (290), L5.0 Stadtstrasse (34), ohne TMC-Bezug 80 (66 davon Kanton Zürich).
-    - Das TMC-Feld `URBAN` ist überall 0 und taugt darum nicht.
-    - Liegt der TMC-Bezugspunkt an einem Knoten (Kreuzung, Kreisel), deutet das auf «bei Knoten» im Sinn der ASTRA-Definition.
-    - Zum Vergleich die Störungen am 27.10.2026, 18:05: 14 auf Autobahnen, 26 auf anderen Strassen.
-  - ★ A: Strassenklasse aus TMC beim Build übernehmen. Autobahn (L1.1) nach ASTRA ausserorts (1 Minute). Stadtstrasse (L5.0) und Knoten auf anderen Strassen nach der Innerorts-Regel: Stau oder Stockend erst, wenn die Schwelle 5 Minuten am Stück unterschritten ist. Hauptstrassen und übrige Strassen vorläufig wie ausserorts. Zählstellen ohne TMC-Bezug ebenfalls wie ausserorts, mit Hinweis.
-  - B: Wie A, aber alle Nicht-Autobahnen nach der Innerorts-Regel. Vorsichtiger, unterschlägt aber kurze Staus ausserorts.
-  - C: Innerorts genau bestimmen, z. B. über die signalisierte Höchstgeschwindigkeit (OpenStreetMap `maxspeed`, ODbL, mit Quellenangabe) oder über Verkehrsnetz CH (VnCH); ob VnCH ein solches Attribut hat, ist noch zu prüfen. Grösserer Aufwand, dafür genauer.
+- **Innerorts genauer bestimmen** (später): Heute gilt eine Zählstelle als innerorts, wenn sie an einer Stadtstrasse (TMC L5.0) oder an einem Knoten abseits der Autobahn liegt. Genauer ginge es über die signalisierte Höchstgeschwindigkeit (OpenStreetMap `maxspeed`, ODbL, mit Quellenangabe) oder über Verkehrsnetz CH (VnCH); ob VnCH ein solches Attribut hat, ist noch zu prüfen.
+- **Verlauf nach Neustart:** Den Verlauf hält der Server nur im Speicher. Nach einem Neustart meldet er innerorts darum erst nach 5 Minuten wieder Stau. Den Verlauf persistent zu halten lohnt sich erst mit dem Rückblick.
 - **Plausibilität:** Unplausible Werte serverseitig verwerfen und in den Details als Messfehler zeigen, z. B. > 200 km/h, Fluss pro Spur > 3000 Fz/h oder km/h > 0 bei 0 Fz/h. Das ist Voraussetzung für Top-Listen und Statistiken. Grenzwerte zum Entscheid.
-- **Legende aus den Konstanten erzeugen:** `de.traffic.threshold` enthält 10 und 30 km/h als festen Text, getrennt von `JAM_BELOW_KMH`/`SLOW_BELOW_KMH` in `web/src/traffic.ts`. Besser als Funktion mit Parameter. Ohne Entscheid umsetzbar.
+- **Texte aus den Konstanten erzeugen:** 10/30 km/h, 5 Minuten und 3 Fahrzeuge pro Minute stehen als fester Text in `web/src/i18n/de.ts`, getrennt von den Konstanten in `server/src/congestion.ts`. Der Server könnte die Schwellen in der API mitliefern. Ohne Entscheid umsetzbar.
 
 ### Funktionen aus der Vorgänger-App
 
@@ -129,6 +123,8 @@ Nicht übernehmen:
 
 | Datum | Entscheid | Grund |
 | --- | --- | --- |
+| 2026-10-27 | Innerorts-Regel (Variante A von drei): Autobahnen (TMC L1.1) nach ASTRA ausserorts. Stadtstrassen (L5.0) und Zählstellen an Knoten abseits der Autobahn erst dann Stau oder Stockend, wenn die Schwelle 5 Minuten am Stück unterschritten ist. Übrige Strassen und Zählstellen ohne TMC-Bezug wie ausserorts. Verworfen: alle Nicht-Autobahnen nach der Innerorts-Regel (B), Innerorts über OSM/VnCH bestimmen (C, später). | ASTRA definiert Stau innerorts über 5 Minuten Verlustzeit an Knoten, die eine Zählstelle nicht misst. An Lichtsignalen zeigte eine einzelne Minute oft nur die Rotphase. |
+| 2026-10-27 | Mindestverkehr (Variante A von drei): Stau und Stockend erst ab 180 Fz/h (3 Fahrzeuge pro Minute) in der langsameren Richtung, darunter «Flüssig» mit Hinweis. Verworfen: eigene Stufe «Wenig Verkehr» (B), kein Mindestfluss (C). | 4 von 51 Störungen beruhten auf einem einzigen Fahrzeug. ASTRA verlangt «häufig Stillstand» des Verkehrs. |
 | 2026-10-27 | Für Stau und stockenden Verkehr gilt die Definition von ASTRA/BFS. Ausserorts: Stau unter 10 km/h, stockend unter 30 km/h, jeweils mindestens 1 Minute. Innerorts: Stau bei mindestens 5 Minuten Verlustzeit an Knoten. Eigene Regeln nur, wo die Definition Lücken lässt (Mindestverkehr, Innerorts-Näherung). | Offizielle und einheitliche Linie für die Schweiz; auch die ASTRA-Staustatistik und Viasuisse folgen ihr. Entscheid des Projektinhabers im Chat. |
 | 2026-10-27 | Teilausfälle (Variante A von drei): Lage aus den übrigen Fahrstreifen, dazu gestrichelter Ring auf der Karte und «x von y Fahrstreifen ohne Daten» in Tooltip und Details. Verworfen: «Keine Daten» bei Ausfall einer ganzen Fahrtrichtung (B), Hinweis nur in den Details (C). | Teilausfälle waren auf der Karte unsichtbar; ein Stau in der ausgefallenen Richtung blieb verborgen (27.10.2026: 38 Zählstellen, 19 mit ganzer Richtung). |
 | 2026-10-27 | Verkehrslage nach der langsameren Fahrtrichtung (`worstSpeed`), nicht nach dem Durchschnitt beider Richtungen. | Der Durchschnitt verdeckte Staus in nur einer Richtung (z. B. 8 km/h und 60 km/h → Ø 19 km/h, «Stockend»). Aus der UI/UX-Review; Umsetzung freigegeben. |

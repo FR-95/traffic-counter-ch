@@ -3,6 +3,12 @@
 export type Direction = 'positive' | 'negative';
 export type VehicleClass = 'car' | 'lorry' | 'any';
 export type Carriageway = 'main' | 'parallel' | 'entry' | 'exit' | 'other';
+/** Verkehrslage nach Definition ASTRA/BFS */
+export type Status = 'jam' | 'slow' | 'free' | 'nodata';
+/** Warum langsamer Verkehr (unter 30 km/h) dennoch als «flüssig» gilt */
+export type StatusHint = 'lowTraffic' | 'urbanPending';
+/** ausserorts bzw. innerorts; bestimmt, welche ASTRA-Regel gilt */
+export type Area = 'rural' | 'urban';
 
 export interface Lane {
   id: string;
@@ -28,6 +34,8 @@ export interface Counter {
   operator: string;
   lat: number;
   lng: number;
+  /** aus der TMC-Strassenklasse abgeleitet; null = unbekannt, beurteilt wie ausserorts */
+  area: Area | null;
   lanes: Lane[];
 }
 
@@ -51,6 +59,10 @@ export interface CounterValues {
   speed: number | null;
   /** km/h der langsamsten Fahrtrichtung (gleiche Fahrstreifen wie `speed`); bestimmt die Verkehrslage */
   worstSpeed: number | null;
+  /** Fahrzeuge/h der langsamsten Fahrtrichtung */
+  worstFlow: number | null;
+  status: Status;
+  statusHint: StatusHint | null;
   /** Fahrstreifen, aus denen `flow`, `speed` und `worstSpeed` berechnet werden (laut Messstellentabelle) */
   countedLanes: number;
   /** davon ohne Daten: mit Fehlercode oder in den Messwerten nicht enthalten */

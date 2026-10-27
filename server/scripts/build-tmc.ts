@@ -42,9 +42,14 @@ if (!input) {
 const dir = findLtefDir(input);
 const version = readDat(dir, 'LOCATIONDATASETS.DAT')[0]?.VERSION ?? 'unbekannt';
 const names = new Map(readDat(dir, 'NAMES.DAT').map((row) => [row.NID, row.NAME]));
-const roadNumbers = new Map(
-  [...readDat(dir, 'ROADS.DAT'), ...readDat(dir, 'SEGMENTS.DAT')].map((row) => [row.LCD, row.ROADNUMBER]),
-);
+const lines = new Map([...readDat(dir, 'ROADS.DAT'), ...readDat(dir, 'SEGMENTS.DAT')].map((row) => [row.LCD, row]));
+const roadNumbers = new Map([...lines].map(([lcd, row]) => [lcd, row.ROADNUMBER]));
+// Segmente (L3) erben die Klasse der Strasse, zu der sie gehören.
+function roadClass(point: Row): string | null {
+  let line = lines.get(point.ROA_LCD ?? '') ?? lines.get(point.SEG_LCD ?? '');
+  if (line?.TCD === '3') line = lines.get(line.ROA_LCD ?? '') ?? line;
+  return line ? `${line.CLASS}${line.TCD}.${line.STCD}` : null;
+}
 
 const offsets = new Map(readDat(dir, 'POFFSETS.DAT').map((row) => [row.LCD, row]));
 const code = (value: string | undefined) => (value ? Number(value) : null);
@@ -61,6 +66,8 @@ for (const point of readDat(dir, 'POINTS.DAT')) {
     coordinate(point.XCOORD),
     code(neighbours?.NEG_OFF_LCD),
     code(neighbours?.POS_OFF_LCD),
+    roadClass(point),
+    `${point.CLASS}${point.TCD}.${point.STCD}`,
   ];
 }
 

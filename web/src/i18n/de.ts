@@ -26,7 +26,7 @@ export const de = {
   },
   statusFilter: {
     legend: 'Lage',
-    hint: 'Massgebend ist die langsamere Fahrtrichtung. Kreisgrösse = Fahrzeuge pro Stunde.',
+    hint: 'Massgebend ist die langsamere Fahrtrichtung, beurteilt nach der Definition des ASTRA. Innerorts gilt Verkehr erst nach 5 Minuten als Stau oder stockend, unter 3 Fahrzeugen pro Minute als flüssig. Kreisgrösse = Fahrzeuge pro Stunde.',
     partial: 'Gestrichelter Ring: Nicht alle Fahrstreifen liefern Daten.',
     countLoading: '–',
   },
@@ -64,6 +64,15 @@ export const de = {
   traffic: {
     status: { jam: 'Stau', slow: 'Stockend', free: 'Flüssig', nodata: 'Keine Daten' },
     threshold: { jam: '< 10 km/h', slow: '< 30 km/h' },
+    statusHint: {
+      lowTraffic: 'Unter 30 km/h, aber weniger als 3 Fahrzeuge pro Minute. Das reicht nicht für eine Aussage zur Lage.',
+      urbanPending: 'Unter 30 km/h seit weniger als 5 Minuten. Innerorts gilt erst das als Stau oder stockender Verkehr.',
+    },
+    area: {
+      rural: 'Beurteilt nach der ASTRA-Regel für ausserorts',
+      urban: 'Beurteilt nach der Regel für innerorts (Stau erst nach 5 Minuten)',
+      unknown: 'Strassentyp unbekannt, beurteilt wie ausserorts',
+    },
     partial: (failed: number, counted: number) => `${failed} von ${counted} Fahrstreifen ohne Daten`,
     errors: {
       VD_OFFLINE: 'Verbindung zum Zählgerät unterbrochen',

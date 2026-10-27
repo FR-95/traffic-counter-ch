@@ -3,10 +3,11 @@ import { distanceM, locate, offsetAlongTmc } from './position.ts';
 import type { TmcLocation } from './tmc.ts';
 
 // Gerade Strasse in Ost-West-Richtung: 1 -> 2 -> 3, je ca. 760 m (0.01° Länge auf 47° Breite).
+const motorway = { road: 'A1', lat: 47, roadClass: 'L1.1', pointType: 'P1.3' };
 const points: Record<number, TmcLocation> = {
-  1: { name: 'West', road: 'A1', lat: 47, lng: 8.0, negative: null, positive: 2 },
-  2: { name: 'Mitte', road: 'A1', lat: 47, lng: 8.01, negative: 1, positive: 3 },
-  3: { name: 'Ost', road: 'A1', lat: 47, lng: 8.02, negative: 2, positive: null },
+  1: { ...motorway, name: 'West', lng: 8.0, negative: null, positive: 2 },
+  2: { ...motorway, name: 'Mitte', lng: 8.01, negative: 1, positive: 3 },
+  3: { ...motorway, name: 'Ost', lng: 8.02, negative: 2, positive: null },
 };
 const tmc = (code: number) => points[code];
 const segment = distanceM({ lat: 47, lng: 8.0 }, { lat: 47, lng: 8.01 });

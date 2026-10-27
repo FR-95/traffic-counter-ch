@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aggregate, buildCounters, counterIdOf, parseMeasurements, parseSiteTable, worstDirectionSpeed } from './datex.ts';
+import { aggregate, buildCounters, counterIdOf, parseMeasurements, parseSiteTable, slowestDirection } from './datex.ts';
 import type { LaneValues } from './types.ts';
 import { measurementsXml, siteTableXml } from './test-fixtures.ts';
 
@@ -33,7 +33,9 @@ describe('parseSiteTable', () => {
 describe('buildCounters', () => {
   it('gruppiert Fahrstreifen und nutzt TMC-Name und -Position', () => {
     const tmc = (code: number) =>
-      code === 100 ? { name: 'Wankdorf', road: 'A6', lat: 46.9631, lng: 7.4652, negative: null, positive: null } : undefined;
+      code === 100
+        ? { name: 'Wankdorf', road: 'A6', lat: 46.9631, lng: 7.4652, negative: null, positive: null, roadClass: 'L1.1', pointType: 'P1.11' }
+        : undefined;
     const counters = buildCounters(parseSiteTable(siteTableXml).records, tmc);
     expect(counters).toHaveLength(2);
     expect(counters[0]).toMatchObject({
@@ -44,9 +46,10 @@ describe('buildCounters', () => {
       operator: 'ASTRA',
       lat: 46.9631,
       lng: 7.4652,
+      area: 'rural',
     });
     expect(counters[0]?.lanes.map((lane) => lane.direction)).toEqual(['positive', 'negative']);
-    expect(counters[1]).toMatchObject({ id: 'CH:0002', name: 'CH:0002', road: null, lat: 46.96, lng: 7.47 });
+    expect(counters[1]).toMatchObject({ id: 'CH:0002', name: 'CH:0002', road: null, lat: 46.96, lng: 7.47, area: null });
   });
 
   it('bevorzugt exakte ASTRA-Sensorpositionen und -Namen', () => {
@@ -74,7 +77,15 @@ describe('parseMeasurements', () => {
   it('aggregiert Verkehrsmenge und gewichtete Geschwindigkeit', () => {
     expect(result.publicationTime).toBe('2026-10-27T07:24:18Z');
     expect(result.measurementTime).toBe('2026-10-27T07:23:00Z');
-    expect(result.counters['CH:0001']).toMatchObject({ flow: 800, speed: 95, worstSpeed: 95, errors: ['VD_OFFLINE'] });
+    expect(result.counters['CH:0001']).toMatchObject({
+      flow: 800,
+      speed: 95,
+      worstSpeed: 95,
+      worstFlow: 800,
+      status: 'free',
+      statusHint: null,
+      errors: ['VD_OFFLINE'],
+    });
     expect(result.counters['CH:0001']?.lanes['CH:0001.01']).toEqual({
       flow: { car: 600, lorry: 200 },
       speed: { car: 100, lorry: 80 },
@@ -108,7 +119,7 @@ describe('Hilfsfunktionen', () => {
     expect(aggregate([{ flow: { any: 300 }, speed: { any: 50 }, error: null }])).toEqual({ flow: 300, speed: 50 });
   });
 
-  it('worstDirectionSpeed liefert die langsamste Fahrtrichtung statt des Durchschnitts', () => {
+  it('slowestDirection liefert die langsamste Fahrtrichtung statt des Durchschnitts', () => {
     const record = (id: string, direction: 'positive' | 'negative') =>
       [id, { id, counterId: 'CH:0001', direction, lane: 'lane1', carriageway: 'main', locationCode: null, offsetDistance: null, lat: null, lng: null, channels: new Map() }] as const;
     const records = new Map([record('a', 'positive'), record('b', 'negative')]);
@@ -117,7 +128,7 @@ describe('Hilfsfunktionen', () => {
       ['b', { flow: { any: 900 }, speed: { any: 60 }, error: null }],
     ];
     expect(aggregate(lanes.map(([, lane]) => lane)).speed).toBe(45);
-    expect(worstDirectionSpeed(lanes, records)).toBe(8);
-    expect(worstDirectionSpeed([], records)).toBeNull();
+    expect(slowestDirection(lanes, records)).toEqual({ speed: 8, flow: 360 });
+    expect(slowestDirection([], records)).toBeNull();
   });
 });

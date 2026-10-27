@@ -1,4 +1,5 @@
 import type { DiskCache } from './cache.ts';
+import { applyAssessment } from './congestion.ts';
 import { buildCounters, parseMeasurements, parseSiteTable, type SiteRecord } from './datex.ts';
 import type { PullAction } from './otd-client.ts';
 import type { SensorLookup } from './sensors.ts';
@@ -33,6 +34,7 @@ export class TrafficStore {
   measurements: MeasurementsResponse | null = null;
   readonly status: Record<Source, SourceStatus> = { sites: emptyStatus(), measurements: emptyStatus() };
   private records = new Map<string, SiteRecord>();
+  private history: MeasurementsResponse[] = [];
   private timers = new Set<NodeJS.Timeout>();
   private measurementsStarted = false;
   private readonly options: TrafficStoreOptions;
@@ -103,7 +105,7 @@ export class TrafficStore {
       this.status.sites = { ...emptyStatus(), updatedAt: sites.savedAt, fromCache: true };
       const measurements = await cache.read(MEASUREMENTS_CACHE);
       if (measurements) {
-        this.measurements = JSON.parse(measurements.data) as MeasurementsResponse;
+        this.applyMeasurements(JSON.parse(measurements.data) as MeasurementsResponse);
         this.status.measurements = { ...emptyStatus(), updatedAt: measurements.savedAt, fromCache: true };
       }
       console.info(`Daten aus Cache vom ${sites.savedAt} wiederhergestellt`);
@@ -121,8 +123,14 @@ export class TrafficStore {
 
   private async refreshMeasurements(): Promise<void> {
     const measurements = parseMeasurements(await this.options.pull('pullMeasuredData'), this.records);
-    this.measurements = measurements;
+    this.applyMeasurements(measurements);
     await this.options.cache?.write(MEASUREMENTS_CACHE, JSON.stringify(measurements));
+  }
+
+  private applyMeasurements(measurements: MeasurementsResponse): void {
+    const areas = new Map(this.counters?.counters.map((counter) => [counter.id, counter.area]));
+    this.history = applyAssessment(measurements, this.history, areas);
+    this.measurements = measurements;
   }
 
   private loop(source: Source, task: () => Promise<void>, intervalMs: number, initialDelayMs = 0): void {

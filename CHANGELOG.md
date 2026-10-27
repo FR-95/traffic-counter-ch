@@ -18,6 +18,10 @@
 - Klick auf eine Zählstelle in der Karte zentriert sie; in der Übersicht zoomt die Karte dabei auf Zoom 12.
 - `worstSpeed` in `/api/measurements`: Geschwindigkeit der langsameren Fahrtrichtung.
 - Teilausfälle sichtbar: Liefert nur ein Teil der Fahrstreifen Daten, zeigt die Karte einen gestrichelten Ring; Tooltip und Details nennen z. B. «1 von 4 Fahrstreifen ohne Daten». Dazu `countedLanes` und `failedLanes` in `/api/measurements`.
+- Verkehrslage nach der Definition von ASTRA/BFS, berechnet im Server. Neu in `/api/measurements`: `status`, `statusHint` und `worstFlow`; in `/api/counters`: `area`.
+- Mindestverkehr: Unter 3 Fahrzeugen pro Minute in der langsameren Richtung gilt der Verkehr als «Flüssig», mit Hinweis in den Details.
+- Innerorts (Stadtstrassen und Knoten laut TMC) gelten Stau und Stockend erst nach 5 Minuten am Stück. Die Details nennen die angewandte Regel.
+- TMC-Ortstabelle um Strassenklasse und Punkttyp ergänzt (`server/data/tmc-locations.json`, weiterhin Version 7.5).
 
 ### Geändert
 

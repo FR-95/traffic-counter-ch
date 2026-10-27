@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { areaOf, assessMinute } from './congestion.ts';
 import { originOf } from './origin.ts';
 import { locate } from './position.ts';
 import { NO_SENSORS, type SensorLookup } from './sensors.ts';
@@ -197,6 +198,7 @@ export function buildCounters(records: SiteRecord[], tmc: TmcLookup, sensors: Se
       operator: origin.operator,
       lat: round6(positions.reduce((sum, p) => sum + p.lat, 0) / positions.length),
       lng: round6(positions.reduce((sum, p) => sum + p.lng, 0) / positions.length),
+      area: areaOf(location),
       lanes: located.map(({ lane, sensor, position }) => ({
         id: lane.id,
         direction: lane.direction,
@@ -272,17 +274,24 @@ export function aggregate(lanes: LaneValues[]): Pick<CounterValues, 'flow' | 'sp
 }
 
 /**
- * Geschwindigkeit der langsamsten Fahrtrichtung. Der Durchschnitt beider Richtungen verdeckt Staus,
+ * Langsamste Fahrtrichtung mit ihrer Verkehrsmenge. Der Durchschnitt beider Richtungen verdeckt Staus,
  * wenn nur eine Richtung betroffen ist (z. B. 8 km/h stadteinwärts, 60 km/h stadtauswärts → Ø 19 km/h).
  */
-export function worstDirectionSpeed(lanes: [string, LaneValues][], records: Map<string, SiteRecord>): number | null {
+export function slowestDirection(
+  lanes: [string, LaneValues][],
+  records: Map<string, SiteRecord>,
+): { speed: number; flow: number | null } | null {
   const byDirection = new Map<string, LaneValues[]>();
   for (const [laneId, lane] of lanes) {
     const direction = records.get(laneId)?.direction ?? 'unknown';
     byDirection.set(direction, [...(byDirection.get(direction) ?? []), lane]);
   }
-  const speeds = [...byDirection.values()].map((group) => aggregate(group).speed).filter((speed) => speed !== null);
-  return speeds.length > 0 ? Math.min(...speeds) : null;
+  let slowest: { speed: number; flow: number | null } | null = null;
+  for (const group of byDirection.values()) {
+    const { speed, flow } = aggregate(group);
+    if (speed !== null && (slowest === null || speed < slowest.speed)) slowest = { speed, flow };
+  }
+  return slowest;
 }
 
 export function parseMeasurements(xml: string, records: Map<string, SiteRecord>): MeasurementsResponse {
@@ -316,14 +325,17 @@ export function parseMeasurements(xml: string, records: Map<string, SiteRecord>)
       const lane = lanes[laneId];
       return lane ? [[laneId, lane]] : [];
     });
-    counters[counterId] = {
+    const slowest = slowestDirection(counted, records);
+    const measured = {
       ...aggregate(counted.map(([, lane]) => lane)),
-      worstSpeed: worstDirectionSpeed(counted, records),
+      worstSpeed: slowest?.speed ?? null,
+      worstFlow: slowest?.flow ?? null,
       countedLanes: countedIds.length,
       failedLanes: countedIds.length - counted.filter(([, lane]) => lane.error === null).length,
       lanes,
       errors: [...new Set(values.map((lane) => lane.error).filter((error) => error !== null))],
     };
+    counters[counterId] = { ...measured, ...assessMinute(measured) };
   }
 
   return {

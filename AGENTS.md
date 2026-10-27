@@ -36,7 +36,7 @@ Diese Dokumente werden nicht automatisch geladen. Lies sie, bevor du am jeweilig
 - **Englisch:** Bezeichner, Dateinamen, API-Felder, Enum-Werte (`'main'`, `'entry'`, `'jam'` …).
 - **Deutsch (Schweiz, Sie-Form, «ss» statt «ß»):** alles, was Nutzer sehen (Wörterbuch `web/src/i18n/de.ts`), dazu Logs, Code-Kommentare, README und Commit-Messages. Datum und Zahlen mit `de-CH`.
 - **Glossar** (Fachbegriff → Code):
-  Zählstelle → `Counter` · Fahrstreifen → `Lane` · Messstelle/Messstellentabelle → `SiteRecord`/`SiteTable` (`sites`) · Messwerte → `measurements` · Fahrzeuge/h → `flow` · Ø km/h → `speed` · Fahrzeugklasse → `VehicleClass` (`car`, `lorry`, `any`) · Fahrtrichtung → `direction` (`positive`/`negative`) · Fahrbahn → `carriageway` · Zielort → `towards` · Quelle → `source` · Betreiber → `operator` · Herkunft → `origin` · exakter Sensorstandort → `exact`.
+  Zählstelle → `Counter` · Fahrstreifen → `Lane` · Messstelle/Messstellentabelle → `SiteRecord`/`SiteTable` (`sites`) · Messwerte → `measurements` · Fahrzeuge/h → `flow` · Ø km/h → `speed` · Fahrzeugklasse → `VehicleClass` (`car`, `lorry`, `any`) · Fahrtrichtung → `direction` (`positive`/`negative`) · Fahrbahn → `carriageway` · Verkehrslage → `status` (`jam`, `slow`, `free`, `nodata`) · ausserorts/innerorts → `area` (`rural`/`urban`) · Zielort → `towards` · Quelle → `source` · Betreiber → `operator` · Herkunft → `origin` · exakter Sensorstandort → `exact`.
 
 ## Regeln für den Code
 

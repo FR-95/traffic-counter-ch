@@ -1,7 +1,7 @@
-import type { Carriageway, CounterValues, Direction, Lane } from '../../server/src/types.ts';
+import type { Area, Carriageway, CounterValues, Direction, Lane, Status } from '../../server/src/types.ts';
 import { de } from './i18n/de.ts';
 
-export type Status = 'jam' | 'slow' | 'free' | 'nodata';
+export type { Status };
 
 /** Reihenfolge nach Dringlichkeit, so auch in Legende und Störungsliste. */
 export const ALL_STATUSES: Status[] = ['jam', 'slow', 'free', 'nodata'];
@@ -12,9 +12,6 @@ export const STATUS_TOKENS: Record<Status, `--traffic-${Status}`> = {
   free: '--traffic-free',
   nodata: '--traffic-nodata',
 };
-
-const JAM_BELOW_KMH = 10;
-const SLOW_BELOW_KMH = 30;
 
 export function statusName(status: Status): string {
   return de.traffic.status[status];
@@ -34,12 +31,16 @@ export function decisiveSpeed(values: CounterValues | undefined): number | null 
 }
 
 export function statusOf(values: CounterValues | undefined): Status {
-  if (!values) return 'nodata';
-  const speed = decisiveSpeed(values);
-  if (speed === null) return values.flow === 0 ? 'free' : 'nodata';
-  if (speed < JAM_BELOW_KMH) return 'jam';
-  if (speed < SLOW_BELOW_KMH) return 'slow';
-  return 'free';
+  return values?.status ?? 'nodata';
+}
+
+/** Warum langsamer Verkehr als «Flüssig» gilt, z. B. zu wenig Verkehr; sonst null. */
+export function statusHintText(values: CounterValues | undefined): string | null {
+  return values?.statusHint ? de.traffic.statusHint[values.statusHint] : null;
+}
+
+export function areaText(area: Area | null): string {
+  return de.traffic.area[area ?? 'unknown'];
 }
 
 /** «1 von 4 Fahrstreifen ohne Daten», wenn die Lage nur auf einem Teil der Fahrstreifen beruht; sonst null. */
