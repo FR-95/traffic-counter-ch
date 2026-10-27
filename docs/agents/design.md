@@ -36,8 +36,9 @@ Angelehnt an die Standortkarte auf intersys.ch, aber für die ganze Schweiz und 
 
 - **Bibliothek:** MapLibre GL, nachgeladen per `React.lazy`, damit die Seitenleiste sofort erscheint. Der Worker ist eine eigene Datei (`setWorkerUrl`), weil die CSP `script-src 'self'` gilt.
 - **Kacheln:** Vektorkacheln der «Basiskarte leicht» von swisstopo, zur Laufzeit von `vectortiles*.geo.admin.ch` (in der CSP freigegeben). Selbst gehostete PMTiles wie auf der Website wären für die ganze Schweiz zu gross.
-- **Stil:** Ein eigener Layer-Aufbau entfällt. `build:map-style` übernimmt aus dem swisstopo-Stil nur Flächen, Wasser, Strassen, Gebäude, Landesgrenze und Beschriftungen. Icons fallen weg; bei Layern mit Text bleibt nur die Beschriftung. Weggelassen sind Relief, Höhenlinien, POIs, Gipfel, Wege, Bahnen sowie Kantons- und Gemeindegrenzen, weil sie die Karte unruhig machen.
-- **Farben:** `tintStyle` in `map/tint.ts` rechnet die Farben zur Laufzeit aus den Tokens um: Land `--teal-surface`, Grautöne von `--deep-teal` bis `--white`, Wasser und Landesgrenze als Mischung aus Deep Teal und Weiss, Beschriftung in Deep Teal bzw. `--ink-muted` mit weissem Halo.
+- **Stil:** Ein eigener Layer-Aufbau entfällt. `build:map-style` übernimmt aus dem swisstopo-Stil nur Flächen, Wasser, Strassen, Gebäude, Landesgrenze und Beschriftungen. Icons fallen weg; bei Layern mit Text bleibt nur die Beschriftung. Weggelassen sind Relief, Höhenlinien, POIs, Gipfel, Wege, Bahnen und Gemeindegrenzen, weil sie die Karte unruhig machen.
+- **Übersicht:** Die swisstopo-Strassen erscheinen erst ab Zoom 8. Drei eigene Layer aus denselben Kacheln zeigen darum in der Übersicht Autobahnen und Autostrassen (`overview_motorway`), Haupt- und Kantonsstrassen (`overview_main`) und gestrichelte Kantonsgrenzen (`overview_canton`). Die Strassen-Layer blenden zwischen Zoom 9 und 11 aus, danach übernehmen die Detailstrassen von swisstopo.
+- **Farben:** `tintStyle` in `map/tint.ts` rechnet die Farben zur Laufzeit aus den Tokens um: Land `--teal-surface`, Grautöne von `--deep-teal` bis `--white`, Wasser und Landesgrenze als Mischung aus Deep Teal und Weiss, Beschriftung in Deep Teal bzw. `--ink-muted` mit weissem Halo. Autobahnen sind in jeder Zoomstufe dunkles Teal (30 % Weiss, Kontur 15 %), Kantonsstrassen in der Übersicht hell (62 %), Kantonsgrenzen 50 %.
 - **Schrift:** Roboto Regular und Medium als Glyphen-PBF unter `/map/fonts`; Frutiger-Schnitte von swisstopo werden darauf abgebildet. Ortsnamen in normaler Schreibung, nur Quartiere und Länder in Grossbuchstaben.
 - **Zählstellen:** GeoJSON-Quelle mit Kreis-Layern unter der Beschriftung; Ampelfarben aus `--traffic-*`, Auswahl mit Rand in `--dark-teal`, exakte Fahrstreifen als Punkte in `--deep-teal`. Tooltips als Text (kein HTML).
 - **Bedienung:** Zoom-Buttons mit `--radius-button` und `--target-min`, kein Drehen und Neigen, sichtbarer Fokusrahmen. Auf Touch-Geräten (Karte in scrollender Seite) verschiebt erst eine Zwei-Finger-Geste die Karte; der Hinweis erscheint auf Deep Teal. Auf dem Desktop zoomt das Mausrad frei, weil die Karte dort die Hauptansicht ist.
@@ -57,7 +58,8 @@ Angelehnt an die Standortkarte auf intersys.ch, aber für die ganze Schweiz und 
 | Logo und Roboto aus dem Design-System-Export | Von intersys.ch übernommen, ebenso die Karten-Glyphen | Der Export liegt dem Projekt nicht vor |
 | Standortkarte: Kacheln selbst gehostet, keine Drittanfragen | Vektorkacheln von swisstopo | Ein PMTiles-Ausschnitt der ganzen Schweiz wäre mehrere hundert MB gross; Hosting ist noch offen |
 | Standortkarte: Mausrad nur mit Ctrl/⌘ | Nur auf Touch-Geräten eingeschränkt | Auf dem Desktop ist die Karte die Hauptansicht, nicht in eine Seite eingebettet |
-| Standortkarte: keine Grenzen | Landesgrenze dezent sichtbar | Orientierung auf der Schweizer Karte |
+| Standortkarte: keine Grenzen | Landesgrenze dezent, Kantonsgrenzen gestrichelt | Orientierung auf der Schweizer Karte |
+| Standortkarte: Strassen weiss | Autobahnen dunkles Teal | Die Zählstellen liegen grösstenteils an Autobahnen; das Netz muss auch in der Übersicht lesbar sein |
 
 ## Abnahme (Checkliste)
 

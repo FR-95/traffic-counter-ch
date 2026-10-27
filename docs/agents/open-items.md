@@ -53,6 +53,7 @@ Entscheid vom 2026-10-27, siehe unten. Das Wörterbuch `web/src/i18n/de.ts` best
 
 | Datum | Entscheid | Grund |
 | --- | --- | --- |
+| 2026-10-27 | Strassennetz der Karte (Variante B von drei): Autobahnen in dunklem Teal in jeder Zoomstufe, Kantonsstrassen hell, Kantonsgrenzen gestrichelt; eigene Übersichts-Layer bis Zoom 11. Verworfen: weisse Strassen wie die Website (A), durchgezogene Kantonsgrenzen (C). | In der Übersicht fehlten Autobahnen und Kantonsstrassen. A unterschied die Strassenklassen kaum, bei C sahen Grenzen und Strassen ähnlich aus. |
 | 2026-10-27 | Karte mit MapLibre GL und swisstopo-Vektorkacheln, zur Laufzeit in Markenfarben umgerechnet (Variante B). Zwei-Finger-Geste nur auf Touch-Geräten, nur die Landesgrenze. Verworfen: Leaflet mit eingefärbten Rasterkacheln (A), selbst gehostete Protomaps-Kacheln (C). | Look und Bedienung der Intersys-Standortkarte ohne Kachel-Hosting. A bot nur eine Tönung ohne Roboto, C braucht eine Datei von mehreren hundert MB und Hosting. |
 | 2026-10-27 | Gestaltung nach dem Intersys-Designbriefing für interne Tools. Aus `intersys.css` werden per `ds:sync` nur Tokens, Basis und die verwendeten Komponenten übernommen. Die Abweichungen stehen in `design.md`. | Als Intersys erkennbar bei kleinem Aufwand. Kein Fork des Design Systems. |
 | 2026-10-27 | Ampel der Karte aus Tokens: Stau = `--error`, Flüssig = `--success`, Keine Daten = `--control-border`, Stockend = eigenes Token `--traffic-slow`. | Möglichst nah am Design System. Für Orange gibt es kein Token. |

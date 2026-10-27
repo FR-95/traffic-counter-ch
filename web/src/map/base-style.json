@@ -501,6 +501,51 @@
       }
     },
     {
+      "id": "overview_canton",
+      "type": "line",
+      "source": "base_v1.0.0",
+      "source-layer": "boundary",
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "get",
+            "admin_level"
+          ],
+          4
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "maritime"
+          ],
+          1
+        ]
+      ],
+      "paint": {
+        "line-color": "#000",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1,
+          12,
+          1.5
+        ],
+        "line-dasharray": [
+          3,
+          2
+        ]
+      }
+    },
+    {
       "id": "boundary",
       "type": "line",
       "source": "base_v1.0.0",
@@ -6342,6 +6387,138 @@
       ]
     },
     {
+      "type": "line",
+      "source": "base_v1.0.0",
+      "source-layer": "transportation",
+      "maxzoom": 11,
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "id": "overview_main",
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "primary",
+            "secondary"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "ramp"
+          ],
+          1
+        ]
+      ],
+      "paint": {
+        "line-color": "#000",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.6,
+          9,
+          1.4,
+          11,
+          1.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          9,
+          1,
+          11,
+          0
+        ]
+      }
+    },
+    {
+      "type": "line",
+      "source": "base_v1.0.0",
+      "source-layer": "transportation",
+      "maxzoom": 11,
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "id": "overview_motorway",
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "motorway",
+            "trunk"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "ramp"
+          ],
+          1
+        ]
+      ],
+      "paint": {
+        "line-color": "#000",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1.4,
+          9,
+          2.8,
+          11,
+          3.5
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          9,
+          1,
+          11,
+          0
+        ]
+      }
+    },
+    {
       "id": "transportation_label",
       "type": "symbol",
       "source": "base_v1.0.0",
@@ -6625,8 +6802,12 @@
                 "<=",
                 50,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               6,
@@ -6638,8 +6819,12 @@
                 "<=",
                 5000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               8,
@@ -6647,8 +6832,12 @@
                 "<=",
                 2000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               6,
@@ -6672,8 +6861,12 @@
                 "<=",
                 50,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               20,
@@ -6685,8 +6878,12 @@
                 "<=",
                 5000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               22,
@@ -6694,8 +6891,12 @@
                 "<=",
                 2000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               20,
@@ -6890,8 +7091,12 @@
                 "<=",
                 30000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               20,
@@ -6903,8 +7108,12 @@
                 "<=",
                 3000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               16,
@@ -6925,8 +7134,12 @@
                 "<=",
                 30000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               32,
@@ -6938,8 +7151,12 @@
                 "<=",
                 3000,
                 [
-                  "get",
-                  "population"
+                  "coalesce",
+                  [
+                    "get",
+                    "population"
+                  ],
+                  0
                 ]
               ],
               28,

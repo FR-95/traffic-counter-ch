@@ -61,6 +61,17 @@ const WATER_SHARE_OF_WHITE = 0.66;
 const BOUNDARY_SHARE_OF_WHITE = 0.45;
 const HALO_OPACITY = 0.8;
 
+// Strassennetz: Autobahnen in dunklem Teal, auch in der Nahansicht; Kantonsstrassen hell, Kantonsgrenzen dezent.
+const FIXED_SHARE_OF_WHITE: Record<string, number> = {
+  overview_motorway: 0.3,
+  overview_main: 0.62,
+  overview_canton: 0.5,
+};
+const MOTORWAY_FILL_SHARE = 0.3;
+const MOTORWAY_CASING_SHARE = 0.15;
+const ROAD_FILL_LAYERS = new Set(['road_fill', 'l1_fill', 'l2_fill']);
+const ROAD_CASING_LAYERS = new Set(['road_casing', 'l1_road_casing', 'l2_road_casing']);
+
 const WATER_LAYERS = new Set(['water', 'water_line']);
 const PRIMARY_LABELS = new Set(['place_city', 'place_town_village', 'place_other', 'place_country', 'water_name_point_label', 'waterway_line_label']);
 
@@ -76,6 +87,19 @@ function mapColors(value: Value, convert: (color: Rgba) => Rgba): Value {
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, mapColors(item, convert)]));
   }
   return value;
+}
+
+/** Ersetzt in `["match", ["get", "class"], …]` die Farbe für Autobahnen (motorway, trunk). */
+function recolorMotorways(value: Value, color: string): Value {
+  if (!Array.isArray(value)) return value;
+  const isClassMatch = value[0] === 'match' && Array.isArray(value[1]) && value[1][0] === 'get' && value[1][1] === 'class';
+  return value.map((item, index) => {
+    const label: Value = value[index - 1];
+    const isOutput = isClassMatch && index >= 3 && index % 2 === 1 && index < value.length - 1;
+    const isMotorway = Array.isArray(label) ? label.includes('motorway') || label.includes('trunk') : label === 'motorway' || label === 'trunk';
+    if (isOutput && isMotorway && typeof item === 'string') return color;
+    return recolorMotorways(item, color);
+  });
 }
 
 /**
@@ -96,6 +120,8 @@ export function tintStyle(base: StyleSpecification, glyphs: string): StyleSpecif
         paint[key] = value;
       } else if (layer.id === 'background') {
         paint[key] = format(land);
+      } else if (layer.id in FIXED_SHARE_OF_WHITE) {
+        paint[key] = format(mix(deepTeal, white, FIXED_SHARE_OF_WHITE[layer.id]!));
       } else if (WATER_LAYERS.has(layer.id)) {
         paint[key] = mapColors(value, ({ a }) => mix(deepTeal, white, WATER_SHARE_OF_WHITE, a));
       } else if (layer.id === 'boundary') {
@@ -106,6 +132,8 @@ export function tintStyle(base: StyleSpecification, glyphs: string): StyleSpecif
         paint[key] = format({ ...white, a: HALO_OPACITY });
       } else {
         paint[key] = mapColors(value, (color) => mix(deepTeal, white, LIGHTNESS_FLOOR + (1 - LIGHTNESS_FLOOR) * lightness(color), color.a));
+        if (ROAD_FILL_LAYERS.has(layer.id)) paint[key] = recolorMotorways(paint[key], format(mix(deepTeal, white, MOTORWAY_FILL_SHARE)));
+        if (ROAD_CASING_LAYERS.has(layer.id)) paint[key] = recolorMotorways(paint[key], format(mix(deepTeal, white, MOTORWAY_CASING_SHARE)));
       }
     }
     return { ...layer, paint } as typeof layer;
