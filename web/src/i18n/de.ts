@@ -1,5 +1,5 @@
-// Alle sichtbaren Texte des Web-Clients. Noch nicht migriert: traffic.ts, status.ts, useTrafficData.ts,
-// TrafficMap.tsx und Texte vom Server (siehe docs/agents/open-items.md).
+// Alle sichtbaren Texte des Web-Clients. Noch nicht migriert: traffic.ts, status.ts (ausser Kartenmeldungen),
+// useTrafficData.ts und Texte vom Server (siehe docs/agents/open-items.md).
 
 export const de = {
   brand: {
@@ -53,5 +53,25 @@ export const de = {
   units: {
     vehiclesPerHour: 'Fz/h',
     kmh: 'km/h',
+  },
+  map: {
+    title: 'Karte der Zählstellen',
+    loading: 'Karte wird geladen …',
+    tilesUnavailable:
+      'Die Hintergrundkarte von swisstopo ist nicht erreichbar. Die Zählstellen werden weiterhin angezeigt. Verschieben oder zoomen Sie die Karte, um es erneut zu versuchen.',
+    webglUnavailable:
+      'Die Karte kann in diesem Browser nicht angezeigt werden, weil WebGL fehlt oder deaktiviert ist. Suche, Liste und Details funktionieren weiterhin.',
+    // Beschriftungen der MapLibre-Bedienelemente
+    locale: {
+      'Map.Title': 'Karte der Zählstellen',
+      'NavigationControl.ZoomIn': 'Vergrössern',
+      'NavigationControl.ZoomOut': 'Verkleinern',
+      'NavigationControl.ResetBearing': 'Nach Norden ausrichten',
+      'AttributionControl.ToggleAttribution': 'Quellenangaben ein- oder ausblenden',
+      'AttributionControl.MapFeedback': 'Rückmeldung zur Karte',
+      'CooperativeGesturesHandler.WindowsHelpText': 'Zum Zoomen Ctrl gedrückt halten und scrollen',
+      'CooperativeGesturesHandler.MacHelpText': 'Zum Zoomen ⌘ gedrückt halten und scrollen',
+      'CooperativeGesturesHandler.MobileHelpText': 'Karte mit zwei Fingern verschieben',
+    },
   },
 } as const;

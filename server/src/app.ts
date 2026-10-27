@@ -6,7 +6,8 @@ import { compress } from 'hono/compress';
 import { secureHeaders } from 'hono/secure-headers';
 import type { TrafficStore } from './store.ts';
 
-const TILE_HOSTS = ['https://wmts.geo.admin.ch', 'https://tile.osm.ch'];
+// Vektorkacheln von swisstopo: tiles.json auf vectortiles, die Kacheln selbst auf vectortiles0–4.
+const TILE_HOSTS = ['https://vectortiles.geo.admin.ch', ...[0, 1, 2, 3, 4].map((n) => `https://vectortiles${n}.geo.admin.ch`)];
 
 export function createApp(store: TrafficStore, staticDir?: string): Hono {
   const app = new Hono();
@@ -17,8 +18,9 @@ export function createApp(store: TrafficStore, staticDir?: string): Hono {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', ...TILE_HOSTS],
-        connectSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'", ...TILE_HOSTS],
+        workerSrc: ["'self'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         frameAncestors: ["'none'"],

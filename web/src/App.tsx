@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import type { Counter } from '../../server/src/types.ts';
 import { CounterDetails } from './CounterDetails.tsx';
 import { CounterGroups } from './CounterGroups.tsx';
@@ -6,10 +6,13 @@ import { CounterSearch } from './CounterSearch.tsx';
 import logoUrl from './design/assets/intersys-logo-white.svg';
 import { groupKey } from './groups.ts';
 import { de } from './i18n/de.ts';
-import { formatTimestamp, measurementTimeOf, statusMessages } from './status.ts';
+import { formatTimestamp, measurementTimeOf, statusMessages, type MapProblem } from './status.ts';
 import { STATUSES, statusOf, type Status } from './traffic.ts';
-import { TrafficMap, type MapCounter, type MapFocus } from './TrafficMap.tsx';
+import type { MapCounter, MapFocus } from './TrafficMap.tsx';
 import { useTrafficData } from './useTrafficData.ts';
+
+// MapLibre ist gross; die Seitenleiste erscheint sofort, die Karte lädt nach.
+const TrafficMap = lazy(() => import('./TrafficMap.tsx'));
 
 const ALL_STATUSES = Object.keys(STATUSES) as Status[];
 
@@ -19,7 +22,7 @@ export function App() {
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(() => new Set());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focus, setFocus] = useState<MapFocus | null>(null);
-  const [tileProblem, setTileProblem] = useState<string | null>(null);
+  const [mapProblem, setMapProblem] = useState<MapProblem | null>(null);
 
   const mapCounters = useMemo<MapCounter[]>(
     () =>
@@ -49,7 +52,7 @@ export function App() {
     measurements,
     hasCounters: counters.length > 0,
     checkedAt,
-    tileProblem,
+    mapProblem,
   });
 
   const toggle = (status: Status) =>
@@ -137,13 +140,15 @@ export function App() {
         </aside>
 
         <main className="map">
-          <TrafficMap
-            counters={groupCounters.filter(({ status }) => visible.has(status))}
-            selected={selected?.counter}
-            focus={focus}
-            onSelect={setSelectedId}
-            onTileHealth={(layer, ok) => setTileProblem((current) => (ok ? (current === layer ? null : current) : layer))}
-          />
+          <Suspense fallback={<p className="map-loading meta">{de.map.loading}</p>}>
+            <TrafficMap
+              counters={groupCounters.filter(({ status }) => visible.has(status))}
+              selected={selected?.counter}
+              focus={focus}
+              onSelect={setSelectedId}
+              onProblem={setMapProblem}
+            />
+          </Suspense>
         </main>
       </div>
     </div>

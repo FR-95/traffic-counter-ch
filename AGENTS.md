@@ -15,6 +15,7 @@ Fachlogik, API und Ausfallverhalten sind in [README.md](README.md) massgebend be
 | Sensorstandorte neu laden | `npm run build:sensors -w server` |
 | TMC-Ortstabelle neu erzeugen | `npm run build:tmc -w server -- <ordner>` |
 | Design System synchronisieren | `npm run ds:sync -w web -- <pfad/zu/intersys.css>` |
+| Kartenstil von swisstopo neu erzeugen | `npm run build:map-style -w web` |
 
 Bevor du `npm run dev` startest, prüfe, ob die Ports 3000 und 5173 schon belegt sind. Meist läuft der Server bereits.
 
@@ -48,7 +49,7 @@ Diese Dokumente werden nicht automatisch geladen. Lies sie, bevor du am jeweilig
 - **Sicherheit:** Der API-Key bleibt auf dem Server, also keine `VITE_*`-Variablen mit Secrets. Die CSP steht in [server/src/app.ts](server/src/app.ts): Inline-Scripts sind nicht erlaubt, neue Kachel- oder Datenhosts müssen dort ausdrücklich ergänzt werden. Kein `dangerouslySetInnerHTML`, Texte aus Fremddaten nur als Text rendern.
 - **Ausfälle gehören zum Normalbetrieb.** Jede externe Quelle braucht definiertes Verhalten: letzte Daten behalten, Grund und Datenstand im UI zeigen. Bei Änderungen die Tabelle «Ausfallverhalten» im README nachführen.
 - **Gestaltung nach dem Intersys Design System** ([docs/agents/design.md](docs/agents/design.md)): nur Tokens, keine freien Farben, Schriftgrössen oder Abstände. Komponenten aus dem Design System verwenden. Eigene Ergänzungen kommen begründet in `web/src/design/additions.css`.
-- **Generierte Dateien** `server/data/astra-sensors.json`, `server/data/tmc-locations.json` und `web/src/design/intersys.css` nie von Hand ändern, sondern mit den Scripts in `server/scripts/` bzw. `web/scripts/` neu erzeugen.
+- **Generierte Dateien** `server/data/astra-sensors.json`, `server/data/tmc-locations.json`, `web/src/design/intersys.css` und `web/src/map/base-style.json` nie von Hand ändern, sondern mit den Scripts in `server/scripts/` bzw. `web/scripts/` neu erzeugen.
 - **Tests ohne Netzwerk.** Parser- und Logiktests arbeiten mit Fixtures ([server/src/test-fixtures.ts](server/src/test-fixtures.ts)). Neue Fachlogik bekommt Tests.
 - **Kommentare** nur, wo der Code das *Warum* nicht selbst zeigt, etwa bei Eigenheiten von DATEX II, TMC oder ASTRA.
 - **Neue Abhängigkeiten** nur mit Begründung. Bestehende Lösungen vorziehen.
@@ -58,6 +59,7 @@ Diese Dokumente werden nicht automatisch geladen. Lies sie, bevor du am jeweilig
 - **opentransportdata.swiss erlaubt 5 Abrufe pro Minute und Key.** Starte darum keinen zweiten Server mit demselben Key (zum Beispiel einen weiteren `npm run dev` oder einen Server in einem Worktree) und rufe die SOAP-API nicht in Schleifen oder Skripten auf. Um Daten anzuschauen, `/api/*` des laufenden Servers oder `server/.cache/` verwenden.
 - `server/.cache/` enthält die letzten echten API-Antworten. Löschen bewirkt beim nächsten Start sofortige API-Abrufe.
 - Die Scripts `build:sensors` (ArcGIS) und `build:tmc` nur bei einer bewussten Datenaktualisierung ausführen und den Diff von `server/data/` vor dem Commit prüfen.
+- **Hintergrundkarte:** Die Vektorkacheln kommen zur Laufzeit von swisstopo (`vectortiles*.geo.admin.ch`, in der CSP von [server/src/app.ts](server/src/app.ts) freigegeben). Stil und Schrift liegen im Projekt. `build:map-style` lädt den aktuellen swisstopo-Stil; den Diff von `web/src/map/base-style.json` vor dem Commit prüfen und die Karte im Browser ansehen.
 
 ## Arbeitsweise
 

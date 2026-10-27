@@ -54,10 +54,22 @@
   margin-top: auto;
 }
 
+.map {
+  position: relative;
+}
+
 .map,
-.leaflet-map {
+.traffic-map {
   width: 100%;
   height: 100%;
+}
+
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--teal-surface);
 }
 
 /* ---------- Karten in der Seitenleiste ---------- */
@@ -290,21 +302,58 @@
   white-space: nowrap;
 }
 
-/* ---------- Leaflet an das Design System anpassen ---------- */
-.leaflet-container {
+/* ---------- MapLibre an das Design System anpassen (wie die Intersys-Standortkarte) ---------- */
+.maplibregl-map {
   font: var(--text-caption);
 }
 
-.leaflet-bar a,
-.leaflet-touch .leaflet-bar a {
+.maplibregl-canvas:focus-visible {
+  outline: 2px solid var(--deep-teal);
+  outline-offset: -2px;
+}
+
+.maplibregl-ctrl-group:not(:empty) {
+  border: 1px solid var(--line-gray);
+  border-radius: var(--radius-button);
+  box-shadow: none;
+}
+
+.maplibregl-ctrl-group button {
   width: var(--target-min);
   height: var(--target-min);
-  line-height: var(--target-min);
+}
+
+.maplibregl-ctrl-group button:not(:disabled):hover {
+  background-color: var(--teal-surface);
+}
+
+.maplibregl-ctrl button:focus-visible {
+  box-shadow: none;
+  outline: 2px solid var(--deep-teal);
+  outline-offset: 1px;
+}
+
+.maplibregl-ctrl-attrib a {
   color: var(--deep-teal);
 }
 
-.leaflet-bar a:hover {
-  background: var(--teal-surface);
+/* Hinweis der Zwei-Finger-Geste auf Deep Teal statt auf Schwarz */
+.maplibregl-cooperative-gesture-screen {
+  background: color-mix(in srgb, var(--deep-teal) 85%, transparent);
+  color: var(--white);
+  font: var(--text-body);
+}
+
+.map-tooltip {
+  pointer-events: none;
+}
+
+.map-tooltip .maplibregl-popup-content {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-button);
+  box-shadow: var(--shadow-float);
+  color: var(--body-ink);
+  font: var(--text-caption);
 }
 
 /* ---------- Responsive ---------- */

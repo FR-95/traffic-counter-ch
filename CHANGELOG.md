@@ -18,3 +18,5 @@
 
 - Gestaltung nach dem Intersys Design System: Kopfleiste in Deep Teal mit Logo, Roboto (selbst gehostet), Karten, Notices und Tabellen aus dem Design System, Ampelfarben der Karte aus Tokens, Klickflächen von mindestens 40 px und Sie-Form.
 - Die Suche hat ein sichtbares Label und einen Hinweis statt eines Platzhaltertexts.
+- Karte mit MapLibre GL statt Leaflet, im Stil der Intersys-Standortkarte: swisstopo-Vektorkacheln in Markenfarben, Beschriftung in Roboto, ohne Relief, Icons und Kantonsgrenzen. Kein Drehen und Neigen; auf Touch-Geräten verschiebt erst eine Zwei-Finger-Geste die Karte. Die Karte lädt nach der Seitenleiste.
+- Die Auswahl der Hintergrundkarte (swisstopo farbig/grau, OpenStreetMap) entfällt.

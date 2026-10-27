@@ -1,9 +1,13 @@
 import type { HealthResponse, MeasurementsResponse } from '../../server/src/types.ts';
+import { de } from './i18n/de.ts';
 
 export interface StatusMessage {
   level: 'error' | 'warning' | 'info';
   text: string;
 }
+
+/** Hintergrundkarte nicht erreichbar bzw. Browser ohne WebGL */
+export type MapProblem = 'tiles' | 'webgl';
 
 interface StatusInput {
   health: HealthResponse | null;
@@ -11,7 +15,7 @@ interface StatusInput {
   measurements: MeasurementsResponse | null;
   hasCounters: boolean;
   checkedAt: number | null;
-  tileProblem: string | null;
+  mapProblem: MapProblem | null;
 }
 
 const STALE_MS = 5 * 60_000;
@@ -30,7 +34,7 @@ export function measurementTimeOf(measurements: MeasurementsResponse | null): st
   return measurements ? (measurements.measurementTime ?? measurements.publicationTime) : null;
 }
 
-export function statusMessages({ health, serverError, measurements, hasCounters, checkedAt, tileProblem }: StatusInput): StatusMessage[] {
+export function statusMessages({ health, serverError, measurements, hasCounters, checkedAt, mapProblem }: StatusInput): StatusMessage[] {
   const messages: StatusMessage[] = [];
   const measuredAt = measurementTimeOf(measurements);
   const shownAt = formatTimestamp(measuredAt, checkedAt);
@@ -68,8 +72,10 @@ export function statusMessages({ health, serverError, measurements, hasCounters,
     }
   }
 
-  if (tileProblem) {
-    messages.push({ level: 'warning', text: `Kartenhintergrund «${tileProblem}» nicht erreichbar – oben rechts eine andere Karte wählen.` });
+  if (mapProblem === 'tiles') {
+    messages.push({ level: 'warning', text: de.map.tilesUnavailable });
+  } else if (mapProblem === 'webgl') {
+    messages.push({ level: 'error', text: de.map.webglUnavailable });
   }
   return messages;
 }
