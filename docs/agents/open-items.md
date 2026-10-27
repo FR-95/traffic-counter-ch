@@ -21,9 +21,9 @@ Erledigte Punkte werden entfernt oder unter «Entscheide» festgehalten. Jeder E
 
 ### UI-Texte ins Wörterbuch auslagern
 
-Entscheid vom 2026-10-27, siehe unten. Das Wörterbuch `web/src/i18n/de.ts` besteht. `App.tsx`, `CounterSearch.tsx`, `CounterGroups.tsx` und `CounterDetails.tsx` sind umgestellt. Noch offen:
+Entscheid vom 2026-10-27, siehe unten. Das Wörterbuch `web/src/i18n/de.ts` besteht. Alle Komponenten sowie `traffic.ts` sind umgestellt. Noch offen:
 
-- Web: Texte in `traffic.ts` (Lage, Fehlercodes, Fahrstreifen, Richtungen), `status.ts` (Statusmeldungen ausser denen der Karte) und `useTrafficData.ts` nach `web/src/i18n/de.ts` verschieben. `TrafficMap.tsx` ist umgestellt.
+- Web: Texte in `status.ts` (Statusmeldungen ausser denen der Karte) und `useTrafficData.ts` nach `web/src/i18n/de.ts` verschieben.
 - Server: Meldungen für Nutzer als Code plus Parameter liefern statt als Text. Betroffen sind:
   - `describeStatus` in `server/src/otd-client.ts`
   - `unavailableReason` in `server/src/store.ts`
@@ -41,6 +41,8 @@ Entscheid vom 2026-10-27, siehe unten. Das Wörterbuch `web/src/i18n/de.ts` best
   - Mindestgrösse für Klickflächen als Token (`--target-min`): Das Briefing nennt 40 px, die Komponenten haben 44–52 px.
   - Kompakter Button (`.button--compact`, 40 px) für Kartenköpfe und dichte Bereiche.
   - Auswahlliste (`.pick-list`) für Suchtreffer und aufklappbare Listen.
+  - Statusanzeige mit Formmerkmal (Punkt, Ring, hohler Ring) und Text, z. B. für Ampeln.
+  - Aufklappbarer Kartenkopf (`.disclosure`) mit Zusammenfassung des eingeklappten Inhalts.
   - App-Layout mit Kopfleiste, Seitenleiste und vollflächiger Karte für Kartenanwendungen.
   - Kartenstil als Teil des Design Systems: `tintStyle` (swisstopo) und `tintFlavor` (Protomaps, Website) folgen derselben Regel und könnten gemeinsam gepflegt werden. Dazu Roboto-Glyphen im Export, auch Bold und weitere Zeichenbereiche (heute nur 0–511 und 8192–8447).
 
@@ -53,6 +55,8 @@ Entscheid vom 2026-10-27, siehe unten. Das Wörterbuch `web/src/i18n/de.ts` best
 
 | Datum | Entscheid | Grund |
 | --- | --- | --- |
+| 2026-10-27 | Verkehrslage nach der langsameren Fahrtrichtung (`worstSpeed`), nicht nach dem Durchschnitt beider Richtungen. | Der Durchschnitt verdeckte Staus in nur einer Richtung (z. B. 8 km/h und 60 km/h → Ø 19 km/h, «Stockend»). Aus der UI/UX-Review; Umsetzung freigegeben. |
+| 2026-10-27 | UI/UX-Review umgesetzt: Ampel mit Helligkeits- und Formunterschieden, Details oben mit Fokusführung, Liste «Aktuelle Störungen», «Quelle und Betreiber» zugeklappt, Auswahl in der URL. | Stau und Flüssig waren bei Rot-Grün-Schwäche ununterscheidbar (Kontrast 1,11:1), Störungen gingen zwischen flüssigen Zählstellen unter, Details erschienen ausserhalb des Sichtbereichs. |
 | 2026-10-27 | Strassennetz der Karte (Variante B von drei): Autobahnen in dunklem Teal in jeder Zoomstufe, Kantonsstrassen hell, Kantonsgrenzen gestrichelt; eigene Übersichts-Layer bis Zoom 11. Verworfen: weisse Strassen wie die Website (A), durchgezogene Kantonsgrenzen (C). | In der Übersicht fehlten Autobahnen und Kantonsstrassen. A unterschied die Strassenklassen kaum, bei C sahen Grenzen und Strassen ähnlich aus. |
 | 2026-10-27 | Karte mit MapLibre GL und swisstopo-Vektorkacheln, zur Laufzeit in Markenfarben umgerechnet (Variante B). Zwei-Finger-Geste nur auf Touch-Geräten, nur die Landesgrenze. Verworfen: Leaflet mit eingefärbten Rasterkacheln (A), selbst gehostete Protomaps-Kacheln (C). | Look und Bedienung der Intersys-Standortkarte ohne Kachel-Hosting. A bot nur eine Tönung ohne Roboto, C braucht eine Datei von mehreren hundert MB und Hosting. |
 | 2026-10-27 | Gestaltung nach dem Intersys-Designbriefing für interne Tools. Aus `intersys.css` werden per `ds:sync` nur Tokens, Basis und die verwendeten Komponenten übernommen. Die Abweichungen stehen in `design.md`. | Als Intersys erkennbar bei kleinem Aufwand. Kein Fork des Design Systems. |

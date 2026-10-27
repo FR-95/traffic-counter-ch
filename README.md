@@ -7,7 +7,7 @@ Inspiriert von [m-cirkovic/Open-Data_ASTRA](https://github.com/m-cirkovic/Open-D
 ## Aufbau
 
 - `server/` – Node + Hono. Fragt die SOAP-API zentral ab (Messwerte jede Minute, Messstellen alle 6 h), wandelt das XML in kompaktes JSON und liefert im Produktivbetrieb auch das Frontend aus. Der API-Key bleibt auf dem Server.
-- `web/` – React + Vite + MapLibre GL. Holt `/api/counters` einmal und `/api/measurements` alle 30 s. Die Gestaltung folgt dem Intersys Design System: `web/src/design/intersys.css` wird mit `npm run ds:sync -w web -- <pfad/zu/intersys.css>` erzeugt, Details in [docs/agents/design.md](docs/agents/design.md).
+- `web/` – React + Vite + MapLibre GL. Holt `/api/counters` einmal und `/api/measurements` alle 30 s. Eine ausgewählte Zählstelle steht in der URL (`?z=CH:0182`), Links lassen sich teilen. Die Gestaltung folgt dem Intersys Design System: `web/src/design/intersys.css` wird mit `npm run ds:sync -w web -- <pfad/zu/intersys.css>` erzeugt, Details in [docs/agents/design.md](docs/agents/design.md).
 - Hintergrundkarte: Vektorkacheln der «Basiskarte leicht» von [swisstopo](https://www.swisstopo.admin.ch/de/web-maps-base-map), in Markenfarben umgerechnet. Der reduzierte Stil liegt als Snapshot in `web/src/map/base-style.json`. Aktualisieren: `npm run build:map-style -w web`. Die Roboto-Glyphen für die Beschriftung liegen selbst gehostet unter `web/public/map/fonts/`.
 - `server/data/astra-sensors.json` – exakte Sensorstandorte, Namen und Zielorte der ASTRA-Zählstellen aus dem öffentlichen Feature-Service hinter dem [SVZ-Dashboard](https://www.arcgis.com/apps/dashboards/1673b262537546098589ad3820e5ece2) (Verknüpfung über `SiteReferenceID` = Fahrstreifen-ID). Aktualisieren: `npm run build:sensors -w server`.
 - `server/data/tmc-locations.json` – Fallback für Zählstellen ohne Sensordaten (Kantone): Ortsnamen und Referenzpunkte aus der offiziellen [TMC-Ortstabelle](https://data.opentransportdata.swiss/dataset/rds-tmc) (derzeit Version 7.5); Position = TMC-Punkt plus Offset. Neue Version: ZIP herunterladen, entpacken, `npm run build:tmc -w server -- <ordner>`.
@@ -37,7 +37,7 @@ HOST=0.0.0.0 npm start
 | Endpoint | Inhalt |
 |---|---|
 | `GET /api/counters` | Zählstellen mit Name, Strasse, Koordinaten, Fahrstreifen, Quelle und Betreiber |
-| `GET /api/measurements` | Fahrzeuge/h und Ø km/h pro Zählstelle und Fahrstreifen, Fehlercodes |
+| `GET /api/measurements` | Fahrzeuge/h und Ø km/h pro Zählstelle und Fahrstreifen, km/h der langsameren Fahrtrichtung (`worstSpeed`, bestimmt die Verkehrslage), Fehlercodes |
 | `GET /api/health` | Status pro Quelle (Messstellen, Messwerte): letzter Abruf, Fehler, Daten aus Cache |
 
 ## Ausfallverhalten

@@ -49,6 +49,8 @@ export interface CounterValues {
   /** Summe über die Hauptfahrbahn; Ein-/Ausfahrten nur, wenn es keine Hauptfahrbahn gibt */
   flow: number | null;
   speed: number | null;
+  /** km/h der langsamsten Fahrtrichtung (gleiche Fahrstreifen wie `speed`); bestimmt die Verkehrslage */
+  worstSpeed: number | null;
   lanes: Record<string, LaneValues>;
   errors: string[];
 }

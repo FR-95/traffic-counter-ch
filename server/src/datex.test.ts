@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { aggregate, buildCounters, counterIdOf, parseMeasurements, parseSiteTable } from './datex.ts';
+import { aggregate, buildCounters, counterIdOf, parseMeasurements, parseSiteTable, worstDirectionSpeed } from './datex.ts';
+import type { LaneValues } from './types.ts';
 import { measurementsXml, siteTableXml } from './test-fixtures.ts';
 
 describe('parseSiteTable', () => {
@@ -73,7 +74,7 @@ describe('parseMeasurements', () => {
   it('aggregiert Verkehrsmenge und gewichtete Geschwindigkeit', () => {
     expect(result.publicationTime).toBe('2026-10-27T07:24:18Z');
     expect(result.measurementTime).toBe('2026-10-27T07:23:00Z');
-    expect(result.counters['CH:0001']).toMatchObject({ flow: 800, speed: 95, errors: ['VD_OFFLINE'] });
+    expect(result.counters['CH:0001']).toMatchObject({ flow: 800, speed: 95, worstSpeed: 95, errors: ['VD_OFFLINE'] });
     expect(result.counters['CH:0001']?.lanes['CH:0001.01']).toEqual({
       flow: { car: 600, lorry: 200 },
       speed: { car: 100, lorry: 80 },
@@ -98,5 +99,18 @@ describe('Hilfsfunktionen', () => {
 
   it('aggregate nutzt anyVehicle, wenn keine Fahrzeugklassen vorhanden sind', () => {
     expect(aggregate([{ flow: { any: 300 }, speed: { any: 50 }, error: null }])).toEqual({ flow: 300, speed: 50 });
+  });
+
+  it('worstDirectionSpeed liefert die langsamste Fahrtrichtung statt des Durchschnitts', () => {
+    const record = (id: string, direction: 'positive' | 'negative') =>
+      [id, { id, counterId: 'CH:0001', direction, lane: 'lane1', carriageway: 'main', locationCode: null, offsetDistance: null, lat: null, lng: null, channels: new Map() }] as const;
+    const records = new Map([record('a', 'positive'), record('b', 'negative')]);
+    const lanes: [string, LaneValues][] = [
+      ['a', { flow: { any: 360 }, speed: { any: 8 }, error: null }],
+      ['b', { flow: { any: 900 }, speed: { any: 60 }, error: null }],
+    ];
+    expect(aggregate(lanes.map(([, lane]) => lane)).speed).toBe(45);
+    expect(worstDirectionSpeed(lanes, records)).toBe(8);
+    expect(worstDirectionSpeed([], records)).toBeNull();
   });
 });

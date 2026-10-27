@@ -271,6 +271,20 @@ export function aggregate(lanes: LaneValues[]): Pick<CounterValues, 'flow' | 'sp
   };
 }
 
+/**
+ * Geschwindigkeit der langsamsten Fahrtrichtung. Der Durchschnitt beider Richtungen verdeckt Staus,
+ * wenn nur eine Richtung betroffen ist (z. B. 8 km/h stadteinwärts, 60 km/h stadtauswärts → Ø 19 km/h).
+ */
+export function worstDirectionSpeed(lanes: [string, LaneValues][], records: Map<string, SiteRecord>): number | null {
+  const byDirection = new Map<string, LaneValues[]>();
+  for (const [laneId, lane] of lanes) {
+    const direction = records.get(laneId)?.direction ?? 'unknown';
+    byDirection.set(direction, [...(byDirection.get(direction) ?? []), lane]);
+  }
+  const speeds = [...byDirection.values()].map((group) => aggregate(group).speed).filter((speed) => speed !== null);
+  return speeds.length > 0 ? Math.min(...speeds) : null;
+}
+
 export function parseMeasurements(xml: string, records: Map<string, SiteRecord>): MeasurementsResponse {
   const payload = payloadOf(xml);
   const lanesByCounter = new Map<string, Record<string, LaneValues>>();
@@ -290,11 +304,11 @@ export function parseMeasurements(xml: string, records: Map<string, SiteRecord>)
   const counters: Record<string, CounterValues> = {};
   for (const [counterId, lanes] of lanesByCounter) {
     const values = Object.values(lanes);
-    const through = Object.entries(lanes)
-      .filter(([laneId]) => isThroughLane(records.get(laneId)))
-      .map(([, lane]) => lane);
+    const through = Object.entries(lanes).filter(([laneId]) => isThroughLane(records.get(laneId)));
+    const counted = through.length > 0 ? through : Object.entries(lanes);
     counters[counterId] = {
-      ...aggregate(through.length > 0 ? through : values),
+      ...aggregate(counted.map(([, lane]) => lane)),
+      worstSpeed: worstDirectionSpeed(counted, records),
       lanes,
       errors: [...new Set(values.map((lane) => lane.error).filter((error) => error !== null))],
     };

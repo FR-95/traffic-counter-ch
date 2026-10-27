@@ -23,9 +23,14 @@
 }
 
 .app-header__name {
-  padding-left: var(--space-4);
-  border-left: 1px solid var(--on-dark-muted);
   font: var(--text-h4);
+}
+
+@media (min-width: 576px) {
+  .app-header__name {
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--on-dark-muted);
+  }
 }
 
 /* ---------- Seitenleiste und Karte ---------- */
@@ -52,6 +57,10 @@
 
 .sidebar > footer {
   margin-top: auto;
+}
+
+.selection-hint {
+  margin-top: var(--space-2);
 }
 
 .map {
@@ -119,12 +128,12 @@
   width: var(--space-3);
   height: var(--space-3);
   border-radius: 50%;
-  border: 1px solid var(--white);
-  box-shadow: 0 0 0 1px var(--control-border);
 }
 
+/* Gleiche Formen wie auf der Karte: Stau mit Ring, Keine Daten hohl */
 .dot--jam {
   background: var(--traffic-jam);
+  box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--traffic-jam);
 }
 
 .dot--slow {
@@ -136,7 +145,43 @@
 }
 
 .dot--nodata {
-  background: var(--traffic-nodata);
+  background: var(--white);
+  border: 2px solid var(--traffic-nodata);
+}
+
+/* Lage als Text mit Punkt, z. B. in der Störungsliste */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+
+.status-badge .dot {
+  margin-inline: var(--space-1);
+}
+
+.status-badge--jam {
+  color: var(--error);
+}
+
+/* Platz für den Ring des Stau-Punkts, damit Beschriftungen bündig stehen */
+.check-field .dot {
+  margin-inline: var(--space-1);
+}
+
+/* Kartentitel als Überschrift (h2) mit optionaler Anzahl */
+.card__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font: var(--text-h4);
+  color: var(--deep-teal);
+}
+
+.card__title .count {
+  font: var(--text-body);
 }
 
 /* ---------- Meldungen ---------- */
@@ -190,6 +235,40 @@
 
 .pick-list .dot {
   align-self: center;
+  /* Platz für den Ring des Stau-Punkts, damit alle Namen bündig stehen */
+  margin-inline: var(--space-1);
+}
+
+.pick-list__name {
+  font-weight: 700;
+}
+
+.disruptions .pick-list button {
+  display: grid;
+  grid-template-columns: var(--space-5) minmax(0, 1fr);
+  gap: 0 var(--space-3);
+  align-items: center;
+}
+
+.disruptions .pick-list .dot {
+  justify-self: center;
+  margin: 0;
+}
+
+.disruptions .pick-list .meta {
+  grid-column: 2;
+}
+
+.status-text--jam {
+  color: var(--error);
+}
+
+.status-text--slow {
+  color: var(--body-ink);
+}
+
+.disruptions .button--compact {
+  margin-top: var(--space-3);
 }
 
 .groups .pick-list {
@@ -199,6 +278,37 @@
 }
 
 /* ---------- Gruppen nach Quelle und Betreiber ---------- */
+.groups .card__title {
+  margin: 0;
+}
+
+.disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--target-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.disclosure__summary {
+  display: block;
+  font-weight: 400;
+}
+
+.groups fieldset {
+  min-width: 0;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  border: 0;
+}
+
 .groups ul {
   margin: 0;
   padding: 0;
@@ -258,11 +368,25 @@
   gap: var(--space-3);
 }
 
+.details > * {
+  min-width: 0;
+}
+
 .details header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: start;
   gap: var(--space-3);
+}
+
+.details h2:focus {
+  outline: none;
+}
+
+.details h2:focus-visible {
+  outline: 2px solid var(--deep-teal);
+  outline-offset: 3px;
 }
 
 .details h2 {
@@ -280,17 +404,43 @@
   font-weight: 700;
 }
 
-.details caption {
-  padding-bottom: var(--space-2);
+.direction h3 {
+  margin-bottom: var(--space-1);
+  font: var(--text-body);
+  font-weight: 700;
 }
 
-.details :is(th, td) {
-  padding: var(--space-2);
+.lanes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-gray);
+}
+
+.lanes > li {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line-gray);
+}
+
+.lane__name {
+  display: block;
+  color: var(--deep-teal);
+  font-weight: 700;
+}
+
+.lanes dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 var(--space-3);
   font-variant-numeric: tabular-nums;
 }
 
-.details tbody tr:hover {
-  background: var(--soft-surface);
+.lanes dt {
+  color: var(--ink-muted);
+}
+
+.lanes dd {
+  font-weight: 400;
 }
 
 .lane-error {

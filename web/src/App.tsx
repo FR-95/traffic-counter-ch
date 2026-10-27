@@ -1,28 +1,43 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { Counter } from '../../server/src/types.ts';
 import { CounterDetails } from './CounterDetails.tsx';
 import { CounterGroups } from './CounterGroups.tsx';
 import { CounterSearch } from './CounterSearch.tsx';
 import logoUrl from './design/assets/intersys-logo-white.svg';
+import { Disruptions } from './Disruptions.tsx';
 import { groupKey } from './groups.ts';
 import { de } from './i18n/de.ts';
 import { formatTimestamp, measurementTimeOf, statusMessages, type MapProblem } from './status.ts';
-import { STATUSES, statusOf, type Status } from './traffic.ts';
+import { ALL_STATUSES, statusLabel, statusOf, type Status } from './traffic.ts';
 import type { MapCounter, MapFocus } from './TrafficMap.tsx';
 import { useTrafficData } from './useTrafficData.ts';
 
 // MapLibre ist gross; die Seitenleiste erscheint sofort, die Karte lädt nach.
 const TrafficMap = lazy(() => import('./TrafficMap.tsx'));
 
-const ALL_STATUSES = Object.keys(STATUSES) as Status[];
+// Ausgewählte Zählstelle in der URL, damit sich ein Link auf sie teilen lässt (?z=CH:0182).
+const SELECTION_PARAM = 'z';
+
+function selectionFromUrl(): string | null {
+  return new URLSearchParams(window.location.search).get(SELECTION_PARAM);
+}
+
+function writeSelectionToUrl(id: string | null) {
+  const url = new URL(window.location.href);
+  if (id) url.searchParams.set(SELECTION_PARAM, id);
+  else url.searchParams.delete(SELECTION_PARAM);
+  window.history.replaceState(null, '', url);
+}
 
 export function App() {
   const { counters, measurements, health, serverError, checkedAt } = useTrafficData();
   const [visible, setVisible] = useState<Set<Status>>(() => new Set(ALL_STATUSES));
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(() => new Set());
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(selectionFromUrl);
+  const [selectionKey, setSelectionKey] = useState(0);
   const [focus, setFocus] = useState<MapFocus | null>(null);
   const [mapProblem, setMapProblem] = useState<MapProblem | null>(null);
+  const flewToInitial = useRef(false);
 
   const mapCounters = useMemo<MapCounter[]>(
     () =>
@@ -55,6 +70,15 @@ export function App() {
     mapProblem,
   });
 
+  useEffect(() => writeSelectionToUrl(selectedId), [selectedId]);
+
+  // Beim Öffnen eines geteilten Links die Karte einmal auf die Zählstelle ausrichten.
+  useEffect(() => {
+    if (flewToInitial.current || !selected) return;
+    flewToInitial.current = true;
+    setFocus({ lat: selected.counter.lat, lng: selected.counter.lng, key: Date.now() });
+  }, [selected]);
+
   const toggle = (status: Status) =>
     setVisible((current) => {
       const next = new Set(current);
@@ -73,9 +97,16 @@ export function App() {
       return next;
     });
 
+  const select = (id: string) => {
+    flewToInitial.current = true;
+    setSelectedId(id);
+    setSelectionKey((key) => key + 1);
+  };
+
   const pick = (counter: Counter) => {
     if (hiddenGroups.has(groupKey(counter))) toggleGroups([groupKey(counter)], true);
-    setSelectedId(counter.id);
+    if (!visible.has(statusOf(measurements?.counters[counter.id]))) toggle(statusOf(measurements?.counters[counter.id]));
+    select(counter.id);
     setFocus({ lat: counter.lat, lng: counter.lng, key: Date.now() });
   };
 
@@ -95,6 +126,7 @@ export function App() {
               {' · '}
               {de.page.counterCount(counters.length)}
             </p>
+            {!selected && <p className="meta selection-hint">{de.details.empty}</p>}
           </div>
 
           {messages.length > 0 && (
@@ -107,6 +139,12 @@ export function App() {
             </ul>
           )}
 
+          {selected && (
+            <CounterDetails {...selected} selectionKey={selectionKey} onClose={() => setSelectedId(null)} />
+          )}
+
+          <Disruptions counters={groupCounters} loading={!measurements} onPick={pick} />
+
           <CounterSearch counters={counters} onPick={pick} />
 
           <fieldset className="card">
@@ -114,21 +152,15 @@ export function App() {
             {ALL_STATUSES.map((status) => (
               <label key={status} className="check-field">
                 <input type="checkbox" checked={visible.has(status)} onChange={() => toggle(status)} />
-                <span className={`dot dot--${status}`} />
-                {STATUSES[status].label}
-                <span className="count">{totals[status]}</span>
+                <span className={`dot dot--${status}`} aria-hidden="true" />
+                {statusLabel(status)}
+                <span className="count">{measurements ? totals[status] : de.statusFilter.countLoading}</span>
               </label>
             ))}
-            <p className="meta">{de.statusFilter.sizeHint}</p>
+            <p className="meta">{de.statusFilter.hint}</p>
           </fieldset>
 
           <CounterGroups counters={mapCounters} hidden={hiddenGroups} onToggle={toggleGroups} onPick={pick} />
-
-          {selected ? (
-            <CounterDetails {...selected} onClose={() => setSelectedId(null)} />
-          ) : (
-            <p className="empty-state">{de.details.empty}</p>
-          )}
 
           <footer className="meta">
             {de.page.source}:{' '}
@@ -145,7 +177,7 @@ export function App() {
               counters={groupCounters.filter(({ status }) => visible.has(status))}
               selected={selected?.counter}
               focus={focus}
-              onSelect={setSelectedId}
+              onSelect={select}
               onProblem={setMapProblem}
             />
           </Suspense>

@@ -3,12 +3,12 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import type { FeatureCollection, Point } from 'geojson';
 import { useEffect, useRef, useState } from 'react';
 import type { Counter, CounterValues } from '../../server/src/types.ts';
-import { token } from './design/tokens.ts';
+import { colorToken } from './design/tokens.ts';
 import { de } from './i18n/de.ts';
 import baseStyle from './map/base-style.json';
 import { tintStyle } from './map/tint.ts';
 import type { MapProblem } from './status.ts';
-import { laneLabel, STATUSES, type Status } from './traffic.ts';
+import { ALL_STATUSES, decisiveSpeed, laneLabel, STATUS_TOKENS, statusName, type Status } from './traffic.ts';
 
 // Der Standardpfad des Workers zeigt im Vite-Bundle ins Leere; CSP erlaubt nur Worker vom eigenen Ursprung.
 setWorkerUrl(workerUrl);
@@ -38,9 +38,11 @@ const SWITZERLAND: [[number, number], [number, number]] = [
   [5.9, 45.8],
   [10.5, 47.85],
 ];
+// Grosszügig, damit auch schmale Bildschirme die ganze Schweiz zeigen: Ist der Ausschnitt breiter als maxBounds,
+// zoomt MapLibre sonst hinein.
 const MAX_BOUNDS: [[number, number], [number, number]] = [
-  [4.5, 45.0],
-  [11.9, 48.6],
+  [2.5, 44.0],
+  [13.9, 49.6],
 ];
 const FOCUS_ZOOM = 15;
 const BASE_SOURCE = Object.keys(baseStyle.sources)[0]!;
@@ -50,26 +52,51 @@ const TILE_FAILURE_THRESHOLD = 6;
 // Auf Touch-Geräten liegt die Karte in einer scrollenden Seite; dort verschiebt erst eine Zwei-Finger-Geste die Karte.
 const TOUCH_ONLY = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-const radius: ExpressionSpecification = ['+', 3, ['min', ['/', ['sqrt', ['coalesce', ['get', 'flow'], 0]], 8], 9]];
+// Kreisgrösse nach Verkehrsmenge; je nach Lage gedämpft (Flüssig) oder mit Mindestgrösse (Stau, Stockend),
+// damit Störungen mit wenig Durchfluss nicht im Gewimmel verschwinden.
+const flowRadius: ExpressionSpecification = ['+', 3, ['min', ['/', ['sqrt', ['coalesce', ['get', 'flow'], 0]], 8], 9]];
+const statusRadius: ExpressionSpecification = [
+  'match',
+  ['get', 'status'],
+  'jam',
+  ['max', flowRadius, 7],
+  'slow',
+  ['max', flowRadius, 6],
+  'free',
+  ['*', flowRadius, 0.8],
+  3.5,
+];
+
+/** Skaliert einen Radius mit dem Zoom: in der Übersicht kleiner, damit dichte Regionen lesbar bleiben. */
+function byZoom(radius: ExpressionSpecification, extra = 0): ExpressionSpecification {
+  const scaled = (factor: number): ExpressionSpecification => ['+', ['*', radius, factor], extra];
+  return ['interpolate', ['linear'], ['zoom'], 6, scaled(0.7), 9, scaled(1), 14, scaled(1.4)];
+}
+
+const JAM_RING_GAP = 4;
+const SORT_BY_URGENCY: ExpressionSpecification = ['match', ['get', 'status'], 'jam', 3, 'slow', 2, 'nodata', 1, 0];
 
 function statusColor(): ExpressionSpecification {
-  const [jam, slow, free, nodata] = (['jam', 'slow', 'free', 'nodata'] as const).map((status) => token(STATUSES[status].token));
+  const [jam, slow, free, nodata] = ALL_STATUSES.map((status) => colorToken(STATUS_TOKENS[status]));
   return ['match', ['get', 'status'], 'jam', jam!, 'slow', slow!, 'free', free!, nodata!];
 }
 
 function counterFeatures(counters: MapCounter[]): FeatureCollection<Point> {
   return {
     type: 'FeatureCollection',
-    features: counters.map(({ counter, values, status }) => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [counter.lng, counter.lat] },
-      properties: {
-        id: counter.id,
-        status,
-        flow: values?.flow ?? null,
-        label: values?.speed != null ? `${counter.name} · ${values.speed} ${de.units.kmh}` : counter.name,
-      },
-    })),
+    features: counters.map(({ counter, values, status }) => {
+      const speed = decisiveSpeed(values);
+      return {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [counter.lng, counter.lat] },
+        properties: {
+          id: counter.id,
+          status,
+          flow: values?.flow ?? null,
+          label: speed !== null ? `${counter.name} · ${statusName(status)} · ${speed} ${de.units.kmh}` : `${counter.name} · ${statusName(status)}`,
+        },
+      };
+    }),
   };
 }
 
@@ -87,42 +114,69 @@ function laneFeatures(selected: Counter | undefined): FeatureCollection<Point> {
 }
 
 function addTrafficLayers(map: MapLibreMap) {
-  const white = token('--white');
+  const white = colorToken('--white');
+  const nodata = colorToken('--traffic-nodata');
   // Zählstellen unter die Beschriftung legen; der weisse Halo hält Ortsnamen über den Kreisen lesbar.
   const beforeLabels = map.getStyle().layers.find((layer) => layer.type === 'symbol')?.id;
   map.addSource('counters', { type: 'geojson', data: counterFeatures([]) });
   map.addSource('lanes', { type: 'geojson', data: laneFeatures(undefined) });
-  map.addLayer({
-    id: 'counters',
-    type: 'circle',
-    source: 'counters',
-    layout: { 'circle-sort-key': ['match', ['get', 'status'], 'jam', 3, 'slow', 2, 'free', 1, 0] },
-    paint: {
-      'circle-radius': radius,
-      'circle-color': statusColor(),
-      'circle-opacity': 0.85,
-      'circle-stroke-color': white,
-      'circle-stroke-width': 1,
+  map.addLayer(
+    {
+      id: 'counters',
+      type: 'circle',
+      source: 'counters',
+      layout: { 'circle-sort-key': SORT_BY_URGENCY },
+      paint: {
+        'circle-radius': byZoom(statusRadius),
+        // «Keine Daten» als hohler Ring, damit es nicht wie ein Messwert aussieht
+        'circle-color': ['match', ['get', 'status'], 'nodata', white, statusColor()],
+        'circle-opacity': ['match', ['get', 'status'], 'free', 0.8, 1],
+        'circle-stroke-color': ['match', ['get', 'status'], 'nodata', nodata, white],
+        'circle-stroke-width': ['match', ['get', 'status'], 'jam', 2, 'slow', 1.5, 'nodata', 1.5, 0.75],
+      },
     },
-  }, beforeLabels);
-  map.addLayer({
-    id: 'counter-selected',
-    type: 'circle',
-    source: 'counters',
-    filter: ['==', ['get', 'id'], ''],
-    paint: {
-      'circle-radius': radius,
-      'circle-color': statusColor(),
-      'circle-stroke-color': token('--dark-teal'),
-      'circle-stroke-width': 3,
+    beforeLabels,
+  );
+  // Ring um Staus: Formmerkmal zusätzlich zur Farbe (Rot-Grün-Schwäche, WCAG 1.4.1)
+  map.addLayer(
+    {
+      id: 'counter-jam-ring',
+      type: 'circle',
+      source: 'counters',
+      filter: ['==', ['get', 'status'], 'jam'],
+      paint: {
+        'circle-radius': byZoom(statusRadius, JAM_RING_GAP),
+        'circle-opacity': 0,
+        'circle-stroke-color': colorToken('--traffic-jam'),
+        'circle-stroke-width': 2,
+      },
     },
-  }, beforeLabels);
-  map.addLayer({
-    id: 'lanes',
-    type: 'circle',
-    source: 'lanes',
-    paint: { 'circle-radius': 4, 'circle-color': token('--deep-teal'), 'circle-stroke-color': white, 'circle-stroke-width': 1 },
-  }, beforeLabels);
+    beforeLabels,
+  );
+  map.addLayer(
+    {
+      id: 'counter-selected',
+      type: 'circle',
+      source: 'counters',
+      filter: ['==', ['get', 'id'], ''],
+      paint: {
+        'circle-radius': byZoom(statusRadius, 3),
+        'circle-opacity': 0,
+        'circle-stroke-color': colorToken('--dark-teal'),
+        'circle-stroke-width': 3,
+      },
+    },
+    beforeLabels,
+  );
+  map.addLayer(
+    {
+      id: 'lanes',
+      type: 'circle',
+      source: 'lanes',
+      paint: { 'circle-radius': 4, 'circle-color': colorToken('--deep-teal'), 'circle-stroke-color': white, 'circle-stroke-width': 1 },
+    },
+    beforeLabels,
+  );
 }
 
 export default function TrafficMap({ counters, selected, focus, onSelect, onProblem }: Props) {
@@ -143,7 +197,8 @@ export default function TrafficMap({ counters, selected, focus, onSelect, onProb
         style: tintStyle(baseStyle as unknown as StyleSpecification, GLYPHS),
         bounds: SWITZERLAND,
         maxBounds: MAX_BOUNDS,
-        minZoom: 6,
+        minZoom: 5,
+        fitBoundsOptions: { padding: 12 },
         maxZoom: 18,
         maxPitch: 0,
         dragRotate: false,

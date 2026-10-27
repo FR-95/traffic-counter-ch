@@ -14,10 +14,11 @@
 }
 
 :root {
-  /* Ampel der Verkehrslage auf der Karte. Das Design System hat keine Skala für Datenvisualisierung;
-     Fehler- und Erfolgsfarbe tragen Stau und flüssigen Verkehr, «Keine Daten» ist neutral. */
+  /* Ampel der Verkehrslage auf der Karte. Das Design System hat keine Skala für Datenvisualisierung.
+     Die Stufen unterscheiden sich nicht nur im Farbton: Flüssig ist mittelhell, gedämpft und klein (3.1:1 zu
+     --teal-surface), Stau dunkel mit Ring, Keine Daten hohl. So bleiben sie auch bei Rot-Grün-Schwäche trennbar. */
   --traffic-jam: var(--error);
-  --traffic-free: var(--success);
+  --traffic-free: color-mix(in srgb, var(--success) 75%, var(--white));
   --traffic-nodata: var(--control-border);
   /* Kein Orange im Design System, Peach ist dem Wachstumsclaim vorbehalten und auf grauen Kartenkacheln
      zu hell. Darum ein eigener Wert zwischen Fehler und Erfolg; als Rückmeldung ans Design System gemeldet. */

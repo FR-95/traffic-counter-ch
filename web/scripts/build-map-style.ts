@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const STYLE_URL = 'https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json';
 const OUTPUT = fileURLToPath(new URL('../src/map/base-style.json', import.meta.url));
 
-// Relief, Höhenlinien, POIs, Gipfel, Wege und Bahnen machen die Karte unruhig und lenken von den Zählstellen ab.
+// Relief, Höhenlinien, POIs, Gipfel, Wege, Bahnen und Ländernamen machen die Karte unruhig und lenken von den Zählstellen ab.
 const KEEP_LAYERS = new Set([
   'background',
   'landcover',
@@ -30,7 +30,6 @@ const KEEP_LAYERS = new Set([
   'waterway_line_label',
   'water_name_point_label',
   'place_city',
-  'place_country',
 ]);
 
 // Nur die Landesgrenze (admin_level 2), keine Kantons- oder Gemeindegrenzen.

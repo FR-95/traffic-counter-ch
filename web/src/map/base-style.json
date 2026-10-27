@@ -8033,52 +8033,6 @@
           "city"
         ]
       ]
-    },
-    {
-      "id": "place_country",
-      "type": "symbol",
-      "source": "base_v1.0.0",
-      "source-layer": "place",
-      "minzoom": 0,
-      "maxzoom": 14,
-      "layout": {
-        "text-font": [
-          "Roboto Regular"
-        ],
-        "text-size": [
-          "interpolate",
-          [
-            "linear"
-          ],
-          [
-            "zoom"
-          ],
-          1,
-          12,
-          7,
-          14,
-          11,
-          16,
-          18,
-          24
-        ],
-        "text-field": "{name:latin}",
-        "visibility": "visible",
-        "text-max-width": 10,
-        "text-transform": "uppercase",
-        "text-letter-spacing": 0.12
-      },
-      "paint": {
-        "text-color": "rgba(145, 70, 145, 0.9)",
-        "text-halo-blur": 1,
-        "text-halo-color": "rgba(255, 255, 255, 0.8)",
-        "text-halo-width": 1
-      },
-      "filter": [
-        "==",
-        "class",
-        "country"
-      ]
     }
   ]
 }
