@@ -45,6 +45,8 @@ const MAX_BOUNDS: [[number, number], [number, number]] = [
   [13.9, 49.6],
 ];
 const FOCUS_ZOOM = 15;
+const CLICK_ZOOM_BELOW = 10;
+const CLICK_ZOOM = 12;
 const BASE_SOURCE = Object.keys(baseStyle.sources)[0]!;
 const GLYPHS = `${window.location.origin}/map/fonts/{fontstack}/{range}.pbf`;
 // Einzelne fehlende Kacheln am Kartenrand sind normal; erst eine Serie gilt als Ausfall.
@@ -253,8 +255,14 @@ export default function TrafficMap({ counters, selected, focus, onSelect, onProb
         map.on('mouseleave', layer, hideTooltip);
       }
       map.on('click', 'counters', (event) => {
-        const id = event.features?.[0]?.properties.id;
-        if (typeof id === 'string') callbacks.current.onSelect(id);
+        const feature = event.features?.[0];
+        const id = feature?.properties.id;
+        if (typeof id !== 'string' || feature?.geometry.type !== 'Point') return;
+        callbacks.current.onSelect(id);
+        // Wer in der Karte klickt, sieht die Zählstelle schon: nur in der dichten Übersicht hineinzoomen, sonst zentrieren.
+        const center = feature.geometry.coordinates as [number, number];
+        if (map.getZoom() < CLICK_ZOOM_BELOW) map.flyTo({ center, zoom: CLICK_ZOOM });
+        else map.easeTo({ center });
       });
       setReady(true);
     });

@@ -15,6 +15,7 @@
 - Leerzustand, wenn die Suche keine Zählstelle findet.
 - Liste «Aktuelle Störungen» oben in der Seitenleiste: Stau und stockender Verkehr, langsamste zuerst, anklickbar.
 - Teilbarer Link auf eine Zählstelle (`?z=<Zählstellen-ID>`).
+- Klick auf eine Zählstelle in der Karte zentriert sie; in der Übersicht zoomt die Karte dabei auf Zoom 12.
 - `worstSpeed` in `/api/measurements`: Geschwindigkeit der langsameren Fahrtrichtung.
 
 ### Geändert
