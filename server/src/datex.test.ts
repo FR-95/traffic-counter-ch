@@ -95,6 +95,23 @@ describe('buildCounters', () => {
     expect(counters[0]?.lanes.map((lane) => lane.direction)).toEqual(['positive', 'negative']);
     expect(counters[1]).toMatchObject({ id: 'CH:0002', name: 'CH:0002', road: null, lat: 46.96, lng: 7.47 });
   });
+
+  it('bevorzugt exakte ASTRA-Sensorpositionen und -Namen', () => {
+    const sensors = {
+      lane: (id: string) =>
+        ({
+          'CH:0001.01': { lat: 46.9, lng: 7.4, towards: 'Bern' },
+          'CH:0001.02': { lat: 46.9002, lng: 7.4002, towards: 'Zürich' },
+        })[id],
+      counter: (id: string) => (id === 'CH:0001' ? { name: 'Wankdorf (AB)', canton: 'BE', road: 'A6' } : undefined),
+    };
+    const [counter] = buildCounters(parseSiteTable(siteTableXml).records, () => undefined, sensors);
+    expect(counter).toMatchObject({ name: 'Wankdorf (AB)', canton: 'BE', road: 'A6', lat: 46.9001, lng: 7.4001 });
+    expect(counter?.lanes.map(({ towards, exact }) => [towards, exact])).toEqual([
+      ['Bern', true],
+      ['Zürich', true],
+    ]);
+  });
 });
 
 describe('parseMeasurements', () => {

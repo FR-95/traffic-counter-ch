@@ -9,12 +9,19 @@ export interface Lane {
   direction: Direction | null;
   lane: string | null;
   carriageway: Carriageway | null;
+  /** Zielort der Fahrtrichtung laut ASTRA, z. B. "Solothurn" */
+  towards: string | null;
+  /** true = Sensorstandort exakt, false = aus TMC berechnet */
+  exact: boolean;
+  lat: number | null;
+  lng: number | null;
 }
 
 export interface Counter {
   id: string;
   name: string;
   road: string | null;
+  canton: string | null;
   lat: number;
   lng: number;
   lanes: Lane[];

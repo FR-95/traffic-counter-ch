@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { locate } from './position.ts';
+import { NO_SENSORS, type SensorLookup } from './sensors.ts';
 import type { TmcLookup } from './tmc.ts';
 import type { Carriageway, Counter, CounterValues, Direction, LaneValues, MeasurementsResponse, VehicleClass } from './types.ts';
 
@@ -160,8 +161,10 @@ export function parseSiteTable(xml: string): SiteTable {
   return { publicationTime: text(get(payload, 'publicationTime')), records };
 }
 
+const round6 = (value: number) => Math.round(value * 1e6) / 1e6;
+
 /** Fasst Fahrstreifen zu Zählstellen zusammen; Position = Mittel der Fahrstreifen-Positionen. */
-export function buildCounters(records: SiteRecord[], tmc: TmcLookup): Counter[] {
+export function buildCounters(records: SiteRecord[], tmc: TmcLookup, sensors: SensorLookup = NO_SENSORS): Counter[] {
   const groups = new Map<string, SiteRecord[]>();
   for (const record of records) {
     const group = groups.get(record.counterId);
@@ -172,19 +175,34 @@ export function buildCounters(records: SiteRecord[], tmc: TmcLookup): Counter[] 
   const counters: Counter[] = [];
   for (const [id, lanes] of groups) {
     lanes.sort((a, b) => a.id.localeCompare(b.id));
-    const positions = lanes.map((lane) => locate(lane, tmc)).filter((position) => position !== null);
+    const located = lanes.map((lane) => {
+      const sensor = sensors.lane(lane.id);
+      return { lane, sensor, position: sensor ?? locate(lane, tmc) };
+    });
+    const positions = located.map(({ position }) => position).filter((position) => position !== null);
     if (positions.length === 0) continue;
     const location = lanes
       .map((lane) => (lane.locationCode === null ? undefined : tmc(lane.locationCode)))
       .find((entry) => entry !== undefined);
+    const info = sensors.counter(id);
 
     counters.push({
       id,
-      name: location?.name || id,
-      road: location?.road ?? null,
-      lat: Math.round((positions.reduce((sum, p) => sum + p.lat, 0) / positions.length) * 1e5) / 1e5,
-      lng: Math.round((positions.reduce((sum, p) => sum + p.lng, 0) / positions.length) * 1e5) / 1e5,
-      lanes: lanes.map(({ id: laneId, direction, lane, carriageway }) => ({ id: laneId, direction, lane, carriageway })),
+      name: info?.name || location?.name || id,
+      road: info?.road ?? location?.road ?? null,
+      canton: info?.canton ?? null,
+      lat: round6(positions.reduce((sum, p) => sum + p.lat, 0) / positions.length),
+      lng: round6(positions.reduce((sum, p) => sum + p.lng, 0) / positions.length),
+      lanes: located.map(({ lane, sensor, position }) => ({
+        id: lane.id,
+        direction: lane.direction,
+        lane: lane.lane,
+        carriageway: lane.carriageway,
+        towards: sensor?.towards ?? null,
+        exact: sensor !== undefined,
+        lat: position && round6(position.lat),
+        lng: position && round6(position.lng),
+      })),
     });
   }
   return counters.sort((a, b) => a.id.localeCompare(b.id));

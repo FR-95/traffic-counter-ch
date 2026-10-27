@@ -13,17 +13,21 @@ const format = (value: number | null | undefined, unit: string) => (value == nul
 function groupByDirection(lanes: Lane[]): [string, Lane[]][] {
   const groups = new Map<string, Lane[]>();
   for (const lane of lanes) {
-    const key = directionLabel(lane.direction);
+    const key = lane.direction ?? 'unknown';
     groups.set(key, [...(groups.get(key) ?? []), lane]);
   }
-  return [...groups];
+  return [...groups.values()].map((group) => {
+    const towards = [...new Set(group.map((lane) => lane.towards).filter((value) => value !== null))];
+    return [towards.length > 0 ? `Richtung ${towards.join(' / ')}` : directionLabel(group[0]?.direction ?? null), group];
+  });
 }
 
-function LaneRow({ lane, values }: { lane: Lane; values: LaneValues | undefined }) {
+function LaneRow({ lane, values, showTowards }: { lane: Lane; values: LaneValues | undefined; showTowards: boolean }) {
+  const label = showTowards && lane.towards ? `${laneLabel(lane)} → ${lane.towards}` : laneLabel(lane);
   if (values?.error) {
     return (
       <tr>
-        <th scope="row">{laneLabel(lane)}</th>
+        <th scope="row">{label}</th>
         <td colSpan={2} className="error">
           {errorText(values.error)}
         </td>
@@ -33,7 +37,7 @@ function LaneRow({ lane, values }: { lane: Lane; values: LaneValues | undefined 
   const hasClasses = values?.flow.car !== undefined || values?.flow.lorry !== undefined;
   return (
     <tr>
-      <th scope="row">{laneLabel(lane)}</th>
+      <th scope="row">{label}</th>
       <td>
         {hasClasses
           ? `${format(values?.flow.car, 'Fz/h')} · ${format(values?.speed.car, 'km/h')}`
@@ -54,8 +58,13 @@ export function CounterDetails({ counter, values, status, onClose }: Props) {
         </button>
       </header>
       <p className="muted">
-        {counter.road && `${counter.road} · `}
-        {counter.id}
+        {[counter.road, counter.canton, counter.id].filter(Boolean).join(' · ')}
+        <br />
+        {counter.lanes.every((lane) => lane.exact)
+          ? 'Standort exakt (ASTRA-Sensoren)'
+          : counter.lanes.some((lane) => lane.exact)
+            ? 'Standort teilweise exakt'
+            : 'Standort berechnet (ca. 100–500 m genau)'}
       </p>
       <p>
         <span className="dot" style={{ background: STATUSES[status].color }} /> {STATUSES[status].label}
@@ -83,7 +92,12 @@ export function CounterDetails({ counter, values, status, onClose }: Props) {
           </thead>
           <tbody>
             {lanes.map((lane) => (
-              <LaneRow key={lane.id} lane={lane} values={values?.lanes[lane.id]} />
+              <LaneRow
+                key={lane.id}
+                lane={lane}
+                values={values?.lanes[lane.id]}
+                showTowards={new Set(lanes.map((l) => l.towards)).size > 1}
+              />
             ))}
           </tbody>
         </table>

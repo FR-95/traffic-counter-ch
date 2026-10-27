@@ -27,5 +27,6 @@ export const config = {
   measurementIntervalMs: positiveInt('MEASUREMENT_INTERVAL_MS', 60_000),
   siteTableIntervalMs: positiveInt('SITE_TABLE_INTERVAL_MS', 6 * 60 * 60_000),
   tmcFile: process.env.TMC_FILE ?? fileURLToPath(new URL('../data/tmc-locations.json', import.meta.url)),
+  sensorsFile: process.env.SENSORS_FILE ?? fileURLToPath(new URL('../data/astra-sensors.json', import.meta.url)),
   staticDir: process.env.STATIC_DIR ?? fileURLToPath(new URL('../../web/dist', import.meta.url)),
 };

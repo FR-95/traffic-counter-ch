@@ -1,5 +1,6 @@
 import { buildCounters, parseMeasurements, parseSiteTable, type SiteRecord } from './datex.ts';
 import type { PullAction } from './otd-client.ts';
+import type { SensorLookup } from './sensors.ts';
 import type { TmcLookup } from './tmc.ts';
 import type { CountersResponse, HealthResponse, MeasurementsResponse } from './types.ts';
 
@@ -8,6 +9,7 @@ const RETRY_DELAY_MS = 30_000;
 export interface TrafficStoreOptions {
   pull: (action: PullAction) => Promise<string>;
   tmc: TmcLookup;
+  sensors: SensorLookup;
   measurementIntervalMs: number;
   siteTableIntervalMs: number;
 }
@@ -54,7 +56,7 @@ export class TrafficStore {
     this.records = new Map(table.records.map((record) => [record.id, record]));
     this.counters = {
       updatedAt: table.publicationTime ?? new Date().toISOString(),
-      counters: buildCounters(table.records, this.options.tmc),
+      counters: buildCounters(table.records, this.options.tmc, this.options.sensors),
     };
     console.info(`${this.counters.counters.length} Zählstellen (${table.records.length} Fahrstreifen) geladen`);
   }

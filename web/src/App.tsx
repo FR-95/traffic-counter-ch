@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { CounterDetails } from './CounterDetails.tsx';
+import { CounterSearch } from './CounterSearch.tsx';
 import { STATUSES, statusOf, type Status } from './traffic.ts';
-import { TrafficMap, type MapCounter } from './TrafficMap.tsx';
+import { TrafficMap, type MapCounter, type MapFocus } from './TrafficMap.tsx';
 import { useTrafficData } from './useTrafficData.ts';
 
 const ALL_STATUSES = Object.keys(STATUSES) as Status[];
@@ -11,6 +12,7 @@ export function App() {
   const { counters, measurements, error } = useTrafficData();
   const [visible, setVisible] = useState<Set<Status>>(() => new Set(ALL_STATUSES));
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [focus, setFocus] = useState<MapFocus | null>(null);
 
   const mapCounters = useMemo<MapCounter[]>(
     () =>
@@ -51,6 +53,14 @@ export function App() {
           {error && <p className="error">Fehler beim Laden: {error}</p>}
         </header>
 
+        <CounterSearch
+          counters={counters}
+          onPick={(counter) => {
+            setSelectedId(counter.id);
+            setFocus({ lat: counter.lat, lng: counter.lng, key: Date.now() });
+          }}
+        />
+
         <fieldset className="legend">
           <legend>Verkehrslage</legend>
           {ALL_STATUSES.map((status) => (
@@ -82,7 +92,8 @@ export function App() {
       <main className="map">
         <TrafficMap
           counters={mapCounters.filter(({ status }) => visible.has(status))}
-          selectedId={selectedId}
+          selected={selected?.counter}
+          focus={focus}
           onSelect={setSelectedId}
         />
       </main>

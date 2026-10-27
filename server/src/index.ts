@@ -2,12 +2,14 @@ import { serve } from '@hono/node-server';
 import { createApp } from './app.ts';
 import { config } from './config.ts';
 import { createOtdClient } from './otd-client.ts';
+import { loadSensors } from './sensors.ts';
 import { TrafficStore } from './store.ts';
 import { loadTmc } from './tmc.ts';
 
 const store = new TrafficStore({
   pull: createOtdClient({ endpoint: config.endpoint, apiKey: config.apiKey }),
   tmc: loadTmc(config.tmcFile),
+  sensors: loadSensors(config.sensorsFile),
   measurementIntervalMs: config.measurementIntervalMs,
   siteTableIntervalMs: config.siteTableIntervalMs,
 });
