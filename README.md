@@ -8,7 +8,7 @@ Inspiriert von [m-cirkovic/Open-Data_ASTRA](https://github.com/m-cirkovic/Open-D
 
 - `server/` – Node + Hono. Fragt die SOAP-API zentral ab (Messwerte jede Minute, Messstellen alle 6 h), wandelt das XML in kompaktes JSON und liefert im Produktivbetrieb auch das Frontend aus. Der API-Key bleibt auf dem Server.
 - `web/` – React + Vite + Leaflet. Holt `/api/counters` einmal und `/api/measurements` alle 30 s.
-- `server/data/tmc-locations.json` – Ortsnamen und genaue Koordinaten aus der TMC-Location-Code-Liste Schweiz (die API liefert Koordinaten nur auf ~1 km genau).
+- `server/data/tmc-locations.json` – Ortsnamen und genaue Koordinaten aus der offiziellen [TMC-Ortstabelle](https://data.opentransportdata.swiss/dataset/rds-tmc) (derzeit Version 7.5; die API liefert Koordinaten nur auf ~1 km genau). Neue Version: ZIP herunterladen, entpacken, `npm run build:tmc -w server -- <ordner>`.
 
 ## Entwicklung
 
