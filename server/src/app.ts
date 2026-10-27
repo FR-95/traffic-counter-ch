@@ -27,16 +27,19 @@ export function createApp(store: TrafficStore, staticDir?: string): Hono {
   );
   app.use('/api/*', compress());
 
-  app.get('/api/health', (c) => c.json(store.health()));
+  app.get('/api/health', (c) => {
+    c.header('Cache-Control', 'no-store');
+    return c.json(store.health());
+  });
 
   app.get('/api/counters', (c) => {
-    if (!store.counters) return c.json({ error: 'Messstellen werden noch geladen' }, 503);
+    if (!store.counters) return c.json({ error: store.unavailableReason('sites') }, 503);
     c.header('Cache-Control', 'public, max-age=300');
     return c.json(store.counters);
   });
 
   app.get('/api/measurements', (c) => {
-    if (!store.measurements) return c.json({ error: 'Messwerte werden noch geladen' }, 503);
+    if (!store.measurements) return c.json({ error: store.unavailableReason('measurements') }, 503);
     c.header('Cache-Control', 'public, max-age=15');
     return c.json(store.measurements);
   });

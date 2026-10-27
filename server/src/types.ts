@@ -55,9 +55,18 @@ export interface MeasurementsResponse {
   counters: Record<string, CounterValues>;
 }
 
+export interface SourceStatus {
+  /** letzter erfolgreicher Abruf bzw. Zeitpunkt des Cache-Eintrags */
+  updatedAt: string | null;
+  /** true, solange die Daten aus dem Disk-Cache eines früheren Laufs stammen */
+  fromCache: boolean;
+  /** Fehler des letzten Abrufversuchs, null wenn er erfolgreich war */
+  error: string | null;
+  failedAt: string | null;
+}
+
 export interface HealthResponse {
-  status: 'ok' | 'starting' | 'degraded';
-  countersUpdatedAt: string | null;
-  measurementsPublishedAt: string | null;
-  lastError: string | null;
+  status: 'ok' | 'starting' | 'degraded' | 'down';
+  sites: SourceStatus;
+  measurements: SourceStatus;
 }

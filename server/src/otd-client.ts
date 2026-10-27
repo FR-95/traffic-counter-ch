@@ -22,21 +22,36 @@ export interface OtdClientOptions {
   timeoutMs?: number;
 }
 
+const SERVICE = 'opentransportdata.swiss';
+
+function describeStatus(status: number): string {
+  if (status === 401 || status === 403) return `${SERVICE} lehnt den API-Key ab (HTTP ${status}) – Key prüfen`;
+  if (status === 429) return `Rate-Limit von ${SERVICE} überschritten (HTTP 429)`;
+  if (status >= 500) return `${SERVICE} ist gestört (HTTP ${status})`;
+  return `${SERVICE} antwortet mit HTTP ${status}`;
+}
+
 export function createOtdClient({ endpoint, apiKey, timeoutMs = 60_000 }: OtdClientOptions) {
   return async function pull(action: PullAction): Promise<string> {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/xml; charset=utf-8',
-        Authorization: apiKey,
-        SOAPAction: SOAP_ACTION_BASE + action,
-      },
-      body: REQUEST_BODY,
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    if (!response.ok) {
-      throw new Error(`${action}: HTTP ${response.status} ${response.statusText}`);
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/xml; charset=utf-8',
+          Authorization: apiKey,
+          SOAPAction: SOAP_ACTION_BASE + action,
+        },
+        body: REQUEST_BODY,
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
+        throw new Error(`${SERVICE} antwortet nicht (Zeitüberschreitung nach ${timeoutMs / 1000} s)`, { cause: error });
+      }
+      throw new Error(`Keine Verbindung zu ${SERVICE}`, { cause: error });
     }
+    if (!response.ok) throw new Error(describeStatus(response.status));
     return response.text();
   };
 }

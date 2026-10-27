@@ -1,18 +1,19 @@
 import { useMemo, useState } from 'react';
 import { CounterDetails } from './CounterDetails.tsx';
 import { CounterSearch } from './CounterSearch.tsx';
+import { formatTimestamp, measurementTimeOf, statusMessages } from './status.ts';
 import { STATUSES, statusOf, type Status } from './traffic.ts';
 import { TrafficMap, type MapCounter, type MapFocus } from './TrafficMap.tsx';
 import { useTrafficData } from './useTrafficData.ts';
 
 const ALL_STATUSES = Object.keys(STATUSES) as Status[];
-const timeFormat = new Intl.DateTimeFormat('de-CH', { hour: '2-digit', minute: '2-digit' });
 
 export function App() {
-  const { counters, measurements, error } = useTrafficData();
+  const { counters, measurements, health, serverError, checkedAt } = useTrafficData();
   const [visible, setVisible] = useState<Set<Status>>(() => new Set(ALL_STATUSES));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focus, setFocus] = useState<MapFocus | null>(null);
+  const [tileProblem, setTileProblem] = useState<string | null>(null);
 
   const mapCounters = useMemo<MapCounter[]>(
     () =>
@@ -30,7 +31,15 @@ export function App() {
   }, [mapCounters]);
 
   const selected = mapCounters.find(({ counter }) => counter.id === selectedId);
-  const measuredAt = measurements?.measurementTime ?? measurements?.publicationTime;
+  const measuredAt = measurementTimeOf(measurements);
+  const messages = statusMessages({
+    health,
+    serverError,
+    measurements,
+    hasCounters: counters.length > 0,
+    checkedAt,
+    tileProblem,
+  });
 
   const toggle = (status: Status) =>
     setVisible((current) => {
@@ -46,12 +55,21 @@ export function App() {
         <header>
           <h1>Verkehrszähler Schweiz</h1>
           <p className="muted">
-            {measuredAt ? `Stand ${timeFormat.format(new Date(measuredAt))} Uhr` : 'Messwerte werden geladen …'}
+            {measuredAt ? `Stand ${formatTimestamp(measuredAt, checkedAt)}` : 'Messwerte werden geladen …'}
             {' · '}
             {counters.length} Zählstellen
           </p>
-          {error && <p className="error">Fehler beim Laden: {error}</p>}
         </header>
+
+        {messages.length > 0 && (
+          <ul className="status" aria-live="polite">
+            {messages.map(({ level, text }) => (
+              <li key={text} className={level} role={level === 'error' ? 'alert' : undefined}>
+                {text}
+              </li>
+            ))}
+          </ul>
+        )}
 
         <CounterSearch
           counters={counters}
@@ -95,6 +113,7 @@ export function App() {
           selected={selected?.counter}
           focus={focus}
           onSelect={setSelectedId}
+          onTileHealth={(layer, ok) => setTileProblem((current) => (ok ? (current === layer ? null : current) : layer))}
         />
       </main>
     </div>

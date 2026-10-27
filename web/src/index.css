@@ -103,6 +103,39 @@ a {
   gap: 0.5rem;
 }
 
+.status {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.status li {
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  border-left: 4px solid;
+}
+
+.status .error {
+  background: #fdecea;
+  border-color: #b42318;
+  color: #7a1a12;
+}
+
+.status .warning {
+  background: #fff4e5;
+  border-color: #f28e2b;
+  color: #6b3a00;
+}
+
+.status .info {
+  background: #eef4ff;
+  border-color: #0b62c4;
+  color: #0b3d7a;
+}
+
 .search input {
   width: 100%;
   padding: 0.5rem 0.6rem;

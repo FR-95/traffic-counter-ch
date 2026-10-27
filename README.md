@@ -36,4 +36,14 @@ HOST=0.0.0.0 npm start
 |---|---|
 | `GET /api/counters` | Zählstellen mit Name, Strasse, Koordinaten, Fahrstreifen |
 | `GET /api/measurements` | Fahrzeuge/h und Ø km/h pro Zählstelle und Fahrstreifen, Fehlercodes |
-| `GET /api/health` | Zeitstempel und letzter Fehler |
+| `GET /api/health` | Status pro Quelle (Messstellen, Messwerte): letzter Abruf, Fehler, Daten aus Cache |
+
+## Ausfallverhalten
+
+| Ausfall | Verhalten |
+|---|---|
+| opentransportdata.swiss nicht erreichbar, Key abgelehnt, Rate-Limit | Server behält die letzten Daten (Speicher und `server/.cache/`), versucht es alle 30 s erneut; UI zeigt Grund und Stand der angezeigten Daten |
+| Server-Neustart ohne API | Daten aus `server/.cache/`; ist der Cache noch frisch, wird die API erst bei Ablauf abgefragt (schont das Rate-Limit von 5 Abrufen/Minute) |
+| Eigener Server nicht erreichbar | Browser behält die zuletzt geladenen Daten und meldet den Verbindungsverlust |
+| Kartenkacheln (swisstopo/OSM) | Hinweis im UI, andere Hintergrundkarte wählbar |
+| Sensor-/TMC-Daten | Keine Laufzeitabhängigkeit, Snapshots liegen in `server/data/` |

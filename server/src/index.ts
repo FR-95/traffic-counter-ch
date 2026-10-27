@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server';
 import { createApp } from './app.ts';
+import { DiskCache } from './cache.ts';
 import { config } from './config.ts';
 import { createOtdClient } from './otd-client.ts';
 import { loadSensors } from './sensors.ts';
@@ -10,6 +11,7 @@ const store = new TrafficStore({
   pull: createOtdClient({ endpoint: config.endpoint, apiKey: config.apiKey }),
   tmc: loadTmc(config.tmcFile),
   sensors: loadSensors(config.sensorsFile),
+  cache: new DiskCache(config.cacheDir),
   measurementIntervalMs: config.measurementIntervalMs,
   siteTableIntervalMs: config.siteTableIntervalMs,
 });

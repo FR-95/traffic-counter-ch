@@ -28,5 +28,6 @@ export const config = {
   siteTableIntervalMs: positiveInt('SITE_TABLE_INTERVAL_MS', 6 * 60 * 60_000),
   tmcFile: process.env.TMC_FILE ?? fileURLToPath(new URL('../data/tmc-locations.json', import.meta.url)),
   sensorsFile: process.env.SENSORS_FILE ?? fileURLToPath(new URL('../data/astra-sensors.json', import.meta.url)),
+  cacheDir: process.env.CACHE_DIR ?? fileURLToPath(new URL('../.cache', import.meta.url)),
   staticDir: process.env.STATIC_DIR ?? fileURLToPath(new URL('../../web/dist', import.meta.url)),
 };

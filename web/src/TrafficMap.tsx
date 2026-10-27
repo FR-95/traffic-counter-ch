@@ -1,6 +1,6 @@
 import type { LatLngBoundsExpression } from 'leaflet';
-import { useEffect } from 'react';
-import { CircleMarker, LayersControl, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet';
+import { useEffect, useRef } from 'react';
+import { CircleMarker, LayersControl, MapContainer, TileLayer, Tooltip, useMap, type TileLayerProps } from 'react-leaflet';
 import type { Counter, CounterValues } from '../../server/src/types.ts';
 import { laneLabel, markerRadius, STATUSES, type Status } from './traffic.ts';
 
@@ -22,6 +22,7 @@ interface Props {
   selected: Counter | undefined;
   focus: MapFocus | null;
   onSelect: (id: string) => void;
+  onTileHealth: (layer: string, ok: boolean) => void;
 }
 
 const SWITZERLAND: LatLngBoundsExpression = [
@@ -39,19 +40,55 @@ function FlyTo({ focus }: { focus: MapFocus | null }) {
   return null;
 }
 
-export function TrafficMap({ counters, selected, focus, onSelect }: Props) {
+// Einzelne fehlende Kacheln am Kartenrand sind normal; erst eine Serie gilt als Ausfall.
+const TILE_FAILURE_THRESHOLD = 6;
+
+function MonitoredTileLayer({ name, onHealth, ...props }: TileLayerProps & { name: string; onHealth: Props['onTileHealth'] }) {
+  const failures = useRef(0);
+  return (
+    <TileLayer
+      {...props}
+      eventHandlers={{
+        tileerror: () => {
+          failures.current += 1;
+          if (failures.current === TILE_FAILURE_THRESHOLD) onHealth(name, false);
+        },
+        tileload: () => {
+          if (failures.current >= TILE_FAILURE_THRESHOLD) onHealth(name, true);
+          failures.current = 0;
+        },
+      }}
+    />
+  );
+}
+
+export function TrafficMap({ counters, selected, focus, onSelect, onTileHealth }: Props) {
   return (
     <MapContainer bounds={SWITZERLAND} minZoom={7} preferCanvas className="leaflet-map">
       <FlyTo focus={focus} />
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="swisstopo grau">
-          <TileLayer url={swisstopo('ch.swisstopo.pixelkarte-grau')} maxZoom={18} attribution={SWISSTOPO_ATTRIBUTION} />
+          <MonitoredTileLayer
+            name="swisstopo grau"
+            onHealth={onTileHealth}
+            url={swisstopo('ch.swisstopo.pixelkarte-grau')}
+            maxZoom={18}
+            attribution={SWISSTOPO_ATTRIBUTION}
+          />
         </LayersControl.BaseLayer>
         <LayersControl.BaseLayer name="swisstopo farbig">
-          <TileLayer url={swisstopo('ch.swisstopo.pixelkarte-farbe')} maxZoom={18} attribution={SWISSTOPO_ATTRIBUTION} />
+          <MonitoredTileLayer
+            name="swisstopo farbig"
+            onHealth={onTileHealth}
+            url={swisstopo('ch.swisstopo.pixelkarte-farbe')}
+            maxZoom={18}
+            attribution={SWISSTOPO_ATTRIBUTION}
+          />
         </LayersControl.BaseLayer>
         <LayersControl.BaseLayer name="OpenStreetMap">
-          <TileLayer
+          <MonitoredTileLayer
+            name="OpenStreetMap"
+            onHealth={onTileHealth}
             url="https://tile.osm.ch/switzerland/{z}/{x}/{y}.png"
             maxZoom={18}
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>-Mitwirkende'
