@@ -3,7 +3,9 @@ import type { Counter } from '../../server/src/types.ts';
 import { CounterDetails } from './CounterDetails.tsx';
 import { CounterGroups } from './CounterGroups.tsx';
 import { CounterSearch } from './CounterSearch.tsx';
+import logoUrl from './design/assets/intersys-logo-white.svg';
 import { groupKey } from './groups.ts';
+import { de } from './i18n/de.ts';
 import { formatTimestamp, measurementTimeOf, statusMessages } from './status.ts';
 import { STATUSES, statusOf, type Status } from './traffic.ts';
 import { TrafficMap, type MapCounter, type MapFocus } from './TrafficMap.tsx';
@@ -75,68 +77,75 @@ export function App() {
   };
 
   return (
-    <div className="layout">
-      <aside className="sidebar">
-        <header>
-          <h1>Verkehrszähler Schweiz</h1>
-          <p className="muted">
-            {measuredAt ? `Stand ${formatTimestamp(measuredAt, checkedAt)}` : 'Messwerte werden geladen …'}
-            {' · '}
-            {counters.length} Zählstellen
-          </p>
-        </header>
+    <div className="app">
+      <header className="app-header">
+        <img className="app-header__logo" src={logoUrl} alt={de.brand.logoAlt} width={124} height={24} />
+        <span className="app-header__name">{de.brand.toolName}</span>
+      </header>
 
-        {messages.length > 0 && (
-          <ul className="status" aria-live="polite">
-            {messages.map(({ level, text }) => (
-              <li key={text} className={level} role={level === 'error' ? 'alert' : undefined}>
-                {text}
-              </li>
+      <div className="layout">
+        <aside className="sidebar">
+          <div>
+            <h1>{de.page.title}</h1>
+            <p className="meta">
+              {measuredAt ? de.page.measuredAt(formatTimestamp(measuredAt, checkedAt)) : de.page.loading}
+              {' · '}
+              {de.page.counterCount(counters.length)}
+            </p>
+          </div>
+
+          {messages.length > 0 && (
+            <ul className="notices" aria-live="polite">
+              {messages.map(({ level, text }) => (
+                <li key={text} className={level === 'error' ? 'notice notice--error' : 'notice'} role={level === 'error' ? 'alert' : undefined}>
+                  <strong>{de.notice[level]}:</strong> {text}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <CounterSearch counters={counters} onPick={pick} />
+
+          <fieldset className="card">
+            <legend>{de.statusFilter.legend}</legend>
+            {ALL_STATUSES.map((status) => (
+              <label key={status} className="check-field">
+                <input type="checkbox" checked={visible.has(status)} onChange={() => toggle(status)} />
+                <span className={`dot dot--${status}`} />
+                {STATUSES[status].label}
+                <span className="count">{totals[status]}</span>
+              </label>
             ))}
-          </ul>
-        )}
+            <p className="meta">{de.statusFilter.sizeHint}</p>
+          </fieldset>
 
-        <CounterSearch counters={counters} onPick={pick} />
+          <CounterGroups counters={mapCounters} hidden={hiddenGroups} onToggle={toggleGroups} onPick={pick} />
 
-        <fieldset className="legend">
-          <legend>Verkehrslage</legend>
-          {ALL_STATUSES.map((status) => (
-            <label key={status}>
-              <input type="checkbox" checked={visible.has(status)} onChange={() => toggle(status)} />
-              <span className="dot" style={{ background: STATUSES[status].color }} />
-              {STATUSES[status].label}
-              <span className="count">{totals[status]}</span>
-            </label>
-          ))}
-          <p className="muted small">Kreisgrösse = Fahrzeuge pro Stunde</p>
-        </fieldset>
+          {selected ? (
+            <CounterDetails {...selected} onClose={() => setSelectedId(null)} />
+          ) : (
+            <p className="empty-state">{de.details.empty}</p>
+          )}
 
-        <CounterGroups counters={mapCounters} hidden={hiddenGroups} onToggle={toggleGroups} onPick={pick} />
+          <footer className="meta">
+            {de.page.source}:{' '}
+            <a href="https://opentransportdata.swiss/de/dataset/trafficcounters" target="_blank" rel="noreferrer">
+              opentransportdata.swiss
+            </a>{' '}
+            {de.page.sourceSuffix}
+          </footer>
+        </aside>
 
-        {selected ? (
-          <CounterDetails {...selected} onClose={() => setSelectedId(null)} />
-        ) : (
-          <p className="muted">Zählstelle auf der Karte anklicken für Details.</p>
-        )}
-
-        <footer className="muted small">
-          Daten:{' '}
-          <a href="https://opentransportdata.swiss/de/dataset/trafficcounters" target="_blank" rel="noreferrer">
-            opentransportdata.swiss
-          </a>{' '}
-          (ASTRA, minütlich aktualisiert)
-        </footer>
-      </aside>
-
-      <main className="map">
-        <TrafficMap
-          counters={groupCounters.filter(({ status }) => visible.has(status))}
-          selected={selected?.counter}
-          focus={focus}
-          onSelect={setSelectedId}
-          onTileHealth={(layer, ok) => setTileProblem((current) => (ok ? (current === layer ? null : current) : layer))}
-        />
-      </main>
+        <main className="map">
+          <TrafficMap
+            counters={groupCounters.filter(({ status }) => visible.has(status))}
+            selected={selected?.counter}
+            focus={focus}
+            onSelect={setSelectedId}
+            onTileHealth={(layer, ok) => setTileProblem((current) => (ok ? (current === layer ? null : current) : layer))}
+          />
+        </main>
+      </div>
     </div>
   );
 }

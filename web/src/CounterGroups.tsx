@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Counter } from '../../server/src/types.ts';
 import { groupByOrigin } from './groups.ts';
+import { de } from './i18n/de.ts';
 import type { MapCounter } from './TrafficMap.tsx';
 import { STATUSES } from './traffic.ts';
 
@@ -26,14 +27,14 @@ export function CounterGroups({ counters, hidden, onToggle, onPick }: Props) {
   if (groups.length === 0) return null;
 
   return (
-    <fieldset className="legend groups">
-      <legend>Quelle und Betreiber</legend>
+    <fieldset className="card groups">
+      <legend>{de.groups.legend}</legend>
       {groups.map(({ source, operators, total }) => {
         const keys = operators.map(({ key }) => key);
         const visibleCount = keys.filter((key) => !hidden.has(key)).length;
         return (
           <div key={source} className="group">
-            <label className="source">
+            <label className="check-field source">
               <input
                 type="checkbox"
                 checked={visibleCount === keys.length}
@@ -52,30 +53,30 @@ export function CounterGroups({ counters, hidden, onToggle, onPick }: Props) {
                 return (
                   <li key={key}>
                     <div className="operator">
-                      <label>
+                      <label className="check-field">
                         <input type="checkbox" checked={!hidden.has(key)} onChange={() => onToggle([key], hidden.has(key))} />
                         {operator}
                       </label>
+                      <span className="count">{items.length}</span>
                       <button
                         type="button"
-                        className="expand"
+                        className="icon-button"
                         aria-expanded={isOpen}
                         aria-controls={listId}
-                        aria-label={`Zählstellen von ${operator} ${isOpen ? 'ausblenden' : 'anzeigen'}`}
+                        aria-label={isOpen ? de.groups.hideCounters(operator) : de.groups.showCounters(operator)}
                         onClick={() => toggleList(key)}
                       >
-                        {isOpen ? '▾' : '▸'}
+                        <span aria-hidden="true">{isOpen ? '−' : '+'}</span>
                       </button>
-                      <span className="count">{items.length}</span>
                     </div>
                     {isOpen && (
-                      <ul id={listId} className="counters">
+                      <ul id={listId} className="pick-list">
                         {items.map(({ counter, status }) => (
                           <li key={counter.id}>
                             <button type="button" onClick={() => onPick(counter)} title={STATUSES[status].label}>
-                              <span className="dot" style={{ background: STATUSES[status].color }} />
+                              <span className={`dot dot--${status}`} />
                               {counter.name}
-                              <span className="muted small"> {[counter.road, counter.id].filter(Boolean).join(' · ')}</span>
+                              <span className="meta"> {[counter.road, counter.id].filter(Boolean).join(' · ')}</span>
                             </button>
                           </li>
                         ))}
@@ -88,7 +89,7 @@ export function CounterGroups({ counters, hidden, onToggle, onPick }: Props) {
           </div>
         );
       })}
-      <p className="muted small">Herkunft laut Zählstellen-ID; abgewählte Gruppen werden auf der Karte ausgeblendet.</p>
+      <p className="meta">{de.groups.hint}</p>
     </fieldset>
   );
 }

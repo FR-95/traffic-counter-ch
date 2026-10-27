@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { Counter } from '../../server/src/types.ts';
+import { de } from './i18n/de.ts';
 
 const MAX_RESULTS = 8;
+const MIN_QUERY_LENGTH = 2;
 
 const normalize = (value: string) =>
   value
@@ -11,10 +13,11 @@ const normalize = (value: string) =>
 
 export function CounterSearch({ counters, onPick }: { counters: Counter[]; onPick: (counter: Counter) => void }) {
   const [query, setQuery] = useState('');
+  const needle = normalize(query.trim());
+  const searching = needle.length >= MIN_QUERY_LENGTH && counters.length > 0;
 
   const results = useMemo(() => {
-    const needle = normalize(query.trim());
-    if (needle.length < 2) return [];
+    if (needle.length < MIN_QUERY_LENGTH) return [];
     return counters
       .filter((counter) =>
         normalize(
@@ -22,19 +25,24 @@ export function CounterSearch({ counters, onPick }: { counters: Counter[]; onPic
         ).includes(needle),
       )
       .slice(0, MAX_RESULTS);
-  }, [counters, query]);
+  }, [counters, needle]);
 
   return (
-    <div className="search">
+    <div className="search form-field">
+      <label htmlFor="counter-search">{de.search.label}</label>
       <input
+        id="counter-search"
         type="search"
-        placeholder="Zählstelle suchen (Ort, Strasse, Nummer, Betreiber) …"
-        aria-label="Zählstelle suchen"
+        aria-describedby="counter-search-hint"
+        autoComplete="off"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
+      <p id="counter-search-hint" className="form-field__hint">
+        {de.search.hint}
+      </p>
       {results.length > 0 && (
-        <ul>
+        <ul className="pick-list">
           {results.map((counter) => (
             <li key={counter.id}>
               <button
@@ -45,11 +53,16 @@ export function CounterSearch({ counters, onPick }: { counters: Counter[]; onPic
                 }}
               >
                 {counter.name}
-                <span className="muted small"> {[counter.road, counter.canton, counter.operator, counter.id].filter(Boolean).join(' · ')}</span>
+                <span className="meta"> {[counter.road, counter.canton, counter.operator, counter.id].filter(Boolean).join(' · ')}</span>
               </button>
             </li>
           ))}
         </ul>
+      )}
+      {searching && results.length === 0 && (
+        <p className="empty-state" role="status">
+          {de.search.empty}
+        </p>
       )}
     </div>
   );
