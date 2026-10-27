@@ -6,6 +6,57 @@ export const de = {
     logoAlt: 'Intersys',
     toolName: 'Verkehrszähler Schweiz',
   },
+  nav: {
+    label: 'Seiten',
+    toInfo: 'So funktioniert die Karte',
+    toMap: 'Zur Karte',
+  },
+  info: {
+    documentTitle: 'So funktioniert die Karte – Verkehrszähler Schweiz',
+    title: 'So funktioniert die Karte',
+    intro:
+      'Die Karte zeigt die aktuelle Verkehrslage an den automatischen Zählstellen des Bundesamts für Strassen (ASTRA) und der Kantone. Die Messwerte werden jede Minute aktualisiert.',
+    whatHeading: 'Was die Karte zeigt',
+    what: [
+      'Jeder Kreis ist eine Zählstelle. Die Farbe zeigt die Verkehrslage, die Grösse die Zahl der Fahrzeuge pro Stunde.',
+      'Eine Zählstelle misst an einem Punkt der Strasse, pro Fahrstreifen und Minute, wie viele Fahrzeuge vorbeifahren und wie schnell. Viele Zählstellen unterscheiden dabei Personenwagen und Lastwagen.',
+      'Wählen Sie eine Zählstelle auf der Karte, in der Liste «Aktuelle Störungen» oder über die Suche, um die Werte pro Fahrstreifen zu sehen.',
+    ],
+    statusHeading: 'Wie die Lage beurteilt wird',
+    statusIntro:
+      'Massgebend ist die Definition von Stau und stockendem Verkehr des Bundesamts für Strassen (ASTRA) und des Bundesamts für Statistik (BFS). Beurteilt wird die langsamere Fahrtrichtung, damit ein Stau in nur einer Richtung nicht im Durchschnitt verschwindet. Ein- und Ausfahrten zählen nicht mit.',
+    statusColumn: 'Lage',
+    meaningColumn: 'Bedeutung',
+    statusMeaning: {
+      jam: 'Unter 10 km/h. Der rote Ring macht Stau auch ohne Farbsehen erkennbar.',
+      slow: 'Unter 30 km/h.',
+      free: 'Ab 30 km/h, oder zu wenig Verkehr für eine Aussage.',
+      nodata: 'Kein Fahrstreifen liefert Messwerte.',
+    },
+    partial: 'Gestrichelter Ring: Nicht alle Fahrstreifen liefern Daten. Die Lage beruht auf den übrigen.',
+    rulesHeading: 'Besondere Regeln',
+    rules: [
+      'Ausserorts genügt eine Minute unter der Schwelle, wie in der Definition des ASTRA.',
+      'Innerorts spricht das ASTRA erst von Stau, wenn man an einer Kreuzung oder Engstelle mindestens 5 Minuten verliert. Das misst eine Zählstelle nicht. Darum gilt innerorts erst dann Stau oder stockender Verkehr, wenn die Schwelle 5 Minuten am Stück unterschritten ist.',
+      'Als innerorts gelten Zählstellen an Stadtstrassen sowie an Kreuzungen und Kreiseln abseits der Autobahn, abgeleitet aus dem Ortsverzeichnis des Verkehrsfunks (TMC).',
+      'Fahren weniger als 3 Fahrzeuge pro Minute, gilt der Verkehr als flüssig, auch wenn sie langsam sind. Ein einzelnes langsames Fahrzeug ist noch kein Stau.',
+    ],
+    limitsHeading: 'Was die Karte nicht zeigt',
+    limits: [
+      'Wie lang ein Stau ist. Eine Zählstelle misst nur an ihrem Standort; zwischen zwei Zählstellen kann die Lage anders sein.',
+      'Ursachen wie Unfälle oder Baustellen. Die Karte ersetzt keine Verkehrsmeldungen.',
+      'Den genauen Standort jeder Zählstelle. Bei vielen Zählstellen des ASTRA ist er exakt, bei den übrigen aus dem Ortsverzeichnis berechnet und auf etwa 100 bis 500 Meter genau.',
+      'Lückenlose Daten. Fällt eine Zählstelle oder die Datenquelle aus, zeigt die Karte die letzten Werte mit ihrem Stand und einen Hinweis.',
+    ],
+    sourcesHeading: 'Datenquellen',
+    sources: {
+      measurements: 'Messwerte und Zählstellen: Verkehrszähldaten von ASTRA und Kantonen auf opentransportdata.swiss',
+      definition: 'Definition von Stau und stockendem Verkehr: Bundesamt für Statistik',
+      tmc: 'Ortsverzeichnis des Verkehrsfunks (TMC-Ortstabelle): ASTRA auf opentransportdata.swiss',
+      sensors: 'Exakte Standorte der ASTRA-Zählstellen: Dashboard der Schweizerischen Strassenverkehrszählung',
+      basemap: 'Hintergrundkarte: Bundesamt für Landestopografie swisstopo',
+    },
+  },
   page: {
     title: 'Verkehrslage',
     loading: 'Messwerte werden geladen …',
@@ -28,6 +79,7 @@ export const de = {
     legend: 'Lage',
     hint: 'Massgebend ist die langsamere Fahrtrichtung, beurteilt nach der Definition des ASTRA. Innerorts gilt Verkehr erst nach 5 Minuten als Stau oder stockend, unter 3 Fahrzeugen pro Minute als flüssig. Kreisgrösse = Fahrzeuge pro Stunde.',
     partial: 'Gestrichelter Ring: Nicht alle Fahrstreifen liefern Daten.',
+    moreInfo: 'Wie die Lage beurteilt wird',
     countLoading: '–',
   },
   disruptions: {

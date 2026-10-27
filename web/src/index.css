@@ -33,6 +33,81 @@
   }
 }
 
+.app-header__nav {
+  margin-left: auto;
+}
+
+.app-header__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--white);
+  font: var(--text-nav-button);
+}
+
+.app-header__nav a:hover {
+  color: var(--white);
+}
+
+/* Der Standard-Fokusrahmen in Deep Teal wäre auf der Kopfleiste unsichtbar. */
+.app-header__nav a:focus-visible {
+  outline-color: var(--white);
+}
+
+/* ---------- Infoseite ---------- */
+.info {
+  overflow-y: auto;
+  padding-block: var(--space-6) var(--space-7);
+}
+
+.info h1 {
+  font: var(--text-h2);
+}
+
+.info h2 {
+  margin-top: var(--space-6);
+  font: var(--text-h3);
+}
+
+.info h3 {
+  margin-top: var(--space-5);
+  font: var(--text-h4);
+}
+
+.info :is(p, ul, table) {
+  margin-top: var(--space-3);
+}
+
+.info__lead {
+  font: var(--text-lead);
+}
+
+.info ul {
+  padding-left: var(--space-5);
+}
+
+.info li + li {
+  margin-top: var(--space-2);
+}
+
+.info th,
+.info td {
+  padding: var(--space-3);
+}
+
+.info tbody th {
+  white-space: nowrap;
+}
+
+.info .button {
+  margin-top: var(--space-5);
+}
+
+/* Punkt an der ersten Zeile ausrichten, wenn der Hinweis umbricht */
+.info .legend-note {
+  align-items: baseline;
+}
+
 /* ---------- Seitenleiste und Karte ---------- */
 .layout {
   display: grid;

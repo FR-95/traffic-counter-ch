@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { Counter } from '../../server/src/types.ts';
+import { AppHeader } from './AppHeader.tsx';
 import { CounterDetails } from './CounterDetails.tsx';
 import { CounterGroups } from './CounterGroups.tsx';
 import { CounterSearch } from './CounterSearch.tsx';
-import logoUrl from './design/assets/intersys-logo-white.svg';
 import { Disruptions } from './Disruptions.tsx';
 import { groupKey } from './groups.ts';
 import { de } from './i18n/de.ts';
+import { INFO_PATH } from './routes.ts';
 import { formatTimestamp, measurementTimeOf, statusMessages, type MapProblem } from './status.ts';
 import { ALL_STATUSES, statusLabel, statusOf, type Status } from './traffic.ts';
 import type { MapCounter, MapFocus } from './TrafficMap.tsx';
@@ -112,10 +113,7 @@ export function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <img className="app-header__logo" src={logoUrl} alt={de.brand.logoAlt} width={124} height={24} />
-        <span className="app-header__name">{de.brand.toolName}</span>
-      </header>
+      <AppHeader link={{ href: INFO_PATH, label: de.nav.toInfo }} />
 
       <div className="layout">
         <aside className="sidebar">
@@ -157,7 +155,9 @@ export function App() {
                 <span className="count">{measurements ? totals[status] : de.statusFilter.countLoading}</span>
               </label>
             ))}
-            <p className="meta">{de.statusFilter.hint}</p>
+            <p className="meta">
+              {de.statusFilter.hint} <a href={`${INFO_PATH}#lage`}>{de.statusFilter.moreInfo}</a>
+            </p>
             <p className="meta legend-note">
               <span className="dot dot--partial" aria-hidden="true" />
               {de.statusFilter.partial}

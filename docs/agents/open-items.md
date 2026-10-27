@@ -90,7 +90,7 @@ Umgesetzt am 27.10.2026, siehe «Entscheide»: Mindestverkehr (Variante A, 180 F
 
 Offen, jeweils mit Empfehlung (★):
 
-- **Quelle nennen:** Im Info-Panel auf die ASTRA-Definition verweisen, mit Link. Die Legende nennt sie schon.
+- **Quelle nennen:** Erledigt mit der Seite «So funktioniert die Karte» (`/info`).
 - **Zeitliche Glättung** (Entscheid offen): ASTRA verlangt «mindestens 1 Minute», unsere Minutenwerte erfüllen das schon. Ein Mittel über mehrere Minuten würde kurze Staus unterschlagen, die ASTRA mitzählt.
   - ★ A: Eintritt wie ASTRA nach der letzten Minute, Austritt erst nach z. B. 2 Minuten über der Schwelle (Hysterese), damit die Karte nicht flackert. Den Verlauf hält der Server schon für die Innerorts-Regel.
   - B: Flussgewichtetes Mittel über 3–5 Minuten (weicht von ASTRA ab).
@@ -105,7 +105,7 @@ Offen, jeweils mit Empfehlung (★):
 Die Reihenfolge entspricht der Empfehlung. Jeder Punkt braucht einen Entscheid.
 
 1. **Stand-Badge auf der Karte** (S): Zeit des Datenstands unten rechts, mit eigener Farbe, wenn die Daten veraltet sind. Auf Mobil ist der Stand heute neben der Karte nicht sichtbar.
-2. **Info-Panel** (S): Was die Karte zeigt, wie aktuell und genau sie ist, Datenquelle, Betreiber, Impressum. Den Inhalt liefert der Projektinhaber.
+2. **Info-Panel:** Umgesetzt als Seite «So funktioniert die Karte» (`/info`). Es fehlen noch Betreiber, Kontakt und Impressum; den Inhalt liefert der Projektinhaber.
 3. **Überblick mit Kennzahlen und Top-Listen** (M, nach der Plausibilitätsprüfung): Anzahl Zählstellen, Fahrzeuge/h gesamt (Summe der Querschnitte), langsamste Zählstellen, höchster Verkehrsfluss. Der Server rechnet die Kennzahlen. Top-Listen werden einmal pro Zählstelle gebildet und sortiert; in der Vorgänger-App waren Werte und Orte getrennt sortiert und falsch gepaart. Ob eine Liste der höchsten Geschwindigkeiten («Raser») öffentlich gezeigt wird, ist eine Produktfrage.
 4. **Fahrtrichtungen auf der Karte** (M): Ab Zoom 13 je ein Halbkreis oder Punkt pro Richtung, mit Zielort im Tooltip. Ein Stau in nur einer Richtung wird dadurch direkt sichtbar.
 5. **Fahrstreifen-Grafik in den Details** (M): Balken pro Spur, Personenwagen und Lastwagen gestapelt, ohne Animation, mit Text als Alternative.

@@ -5,9 +5,9 @@ import './design/intersys.css';
 import './design/additions.css';
 import './index.css';
 import { App } from './App.tsx';
+import { InfoPage } from './InfoPage.tsx';
+import { INFO_PATH } from './routes.ts';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+const isInfo = window.location.pathname.replace(/\/$/, '') === INFO_PATH;
+
+createRoot(document.getElementById('root')!).render(<StrictMode>{isInfo ? <InfoPage /> : <App />}</StrictMode>);

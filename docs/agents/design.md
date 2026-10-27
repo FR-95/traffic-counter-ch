@@ -26,6 +26,7 @@ Das Tool folgt dem Intersys-Designbriefing für interne Tools: ruhig, klar, funk
 - **Icons** nur aus dem Design System. Bis die Icons verfügbar sind, gilt das Muster «+»/«−» der FAQ-Komponente zum Auf- und Zuklappen. Notices tragen ein fettes Wort («Fehler:», «Hinweis:»), damit sie nicht nur durch Farbe unterscheidbar sind.
 - **Zustände:** Für jede Ansicht sind Laden, Leer und Fehler gestaltet. Ein Leerzustand sagt, was als Nächstes zu tun ist. Solange Messwerte laden, stehen Anzahlen als «–», nicht als «Keine Daten».
 - **Seitenleiste, von oben nach unten:** Titel und Stand, Meldungen, Details der Auswahl, Aktuelle Störungen, Suche, Filter Lage, Quelle und Betreiber (zugeklappt). Was Nutzende zuerst brauchen, steht oben.
+- **Infoseite** (`/info`): Lesespalte `.container--narrow`, Titel `--text-h2`, Abschnitte `--text-h3`, Einleitung `--text-lead`. Erreichbar über den Link rechts in der Kopfleiste (weiss, Fokusrahmen weiss) und aus der Legende. Die Seiten teilen sich `index.html`; `web/src/routes.ts` hält die Pfade.
 - **Auswahl:** Nach jeder Auswahl (Karte, Störungsliste, Suche, Liste) rücken die Details in Sicht und der Titel erhält den Fokus. Escape oder «Schliessen» gibt den Fokus an das auslösende Element zurück. Die Auswahl steht in der URL (`?z=`).
 - **Barrierefreiheit:** Kontrast mindestens WCAG AA. Dafür nur die Token-Paare des Design Systems verwenden, keine eigenen Kombinationen. Sichtbarer Fokusrahmen, volle Bedienung per Tastatur, Klickflächen mindestens `--target-min` (40 px).
 - **Sprache:** Deutsch (Schweiz), Sie-Form, kein ß. Texte stehen im Wörterbuch `web/src/i18n/de.ts`.
@@ -52,7 +53,7 @@ Angelehnt an die Standortkarte auf intersys.ch, aber für die ganze Schweiz und 
 
 | Briefing | Hier | Grund |
 | --- | --- | --- |
-| Kopfleiste mit Benutzer und Abmelden | Nur Logo und Toolname | Öffentliches Tool ohne Anmeldung |
+| Kopfleiste mit Benutzer und Abmelden | Logo, Toolname und ein Link zur jeweils anderen Seite | Öffentliches Tool ohne Anmeldung |
 | Inhalt im Container 1200 px oder 720 px | Seitenleiste mit `--sidebar-width` (400 px), die Karte füllt den Rest | Kartenanwendung, keine Lesespalte |
 | Kernfunktionen ohne JavaScript | Karte und Filter brauchen JavaScript | WebGL-Karte (MapLibre). Die Server-API funktioniert ohne Client. |
 | Ein primärer Button pro Ansicht | Kein primärer Button | Die Ansicht hat keine Hauptaktion. «Schliessen» ist sekundär. |

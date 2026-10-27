@@ -22,6 +22,7 @@
 - Mindestverkehr: Unter 3 Fahrzeugen pro Minute in der langsameren Richtung gilt der Verkehr als «Flüssig», mit Hinweis in den Details.
 - Innerorts (Stadtstrassen und Knoten laut TMC) gelten Stau und Stockend erst nach 5 Minuten am Stück. Die Details nennen die angewandte Regel.
 - TMC-Ortstabelle um Strassenklasse und Punkttyp ergänzt (`server/data/tmc-locations.json`, weiterhin Version 7.5).
+- Seite «So funktioniert die Karte» unter `/info`: was die Karte zeigt, wie die Lage nach ASTRA beurteilt wird, was sie nicht zeigt, Datenquellen. Erreichbar über die Kopfleiste und aus der Legende.
 
 ### Geändert
 
