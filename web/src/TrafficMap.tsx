@@ -8,7 +8,7 @@ import { de } from './i18n/de.ts';
 import baseStyle from './map/base-style.json';
 import { tintStyle } from './map/tint.ts';
 import type { MapProblem } from './status.ts';
-import { ALL_STATUSES, decisiveSpeed, laneLabel, STATUS_TOKENS, statusName, type Status } from './traffic.ts';
+import { ALL_STATUSES, decisiveSpeed, laneLabel, partialText, STATUS_TOKENS, statusName, type Status } from './traffic.ts';
 
 // Der Standardpfad des Workers zeigt im Vite-Bundle ins Leere; CSP erlaubt nur Worker vom eigenen Ursprung.
 setWorkerUrl(workerUrl);
@@ -66,17 +66,50 @@ const statusRadius: ExpressionSpecification = [
   ['max', flowRadius, 6],
   'free',
   ['*', flowRadius, 0.8],
-  3.5,
+  5,
 ];
 
 /** Skaliert einen Radius mit dem Zoom: in der Übersicht kleiner, damit dichte Regionen lesbar bleiben. */
-function byZoom(radius: ExpressionSpecification, extra = 0): ExpressionSpecification {
-  const scaled = (factor: number): ExpressionSpecification => ['+', ['*', radius, factor], extra];
+function byZoom(radius: ExpressionSpecification, extra: number | ExpressionSpecification = 0, unit = 1): ExpressionSpecification {
+  const scaled = (factor: number): ExpressionSpecification => {
+    const value: ExpressionSpecification = ['+', ['*', radius, factor], extra];
+    return unit === 1 ? value : ['/', value, unit];
+  };
   return ['interpolate', ['linear'], ['zoom'], 6, scaled(0.7), 9, scaled(1), 14, scaled(1.4)];
 }
 
 const JAM_RING_GAP = 4;
 const SORT_BY_URGENCY: ExpressionSpecification = ['match', ['get', 'status'], 'jam', 3, 'slow', 2, 'nodata', 1, 0];
+
+// Kreis-Layer kennen keine gestrichelten Ränder, darum ein Bild, das per icon-size auf den Kreis skaliert wird.
+const PARTIAL_RING = 'partial-ring';
+const PARTIAL_RING_RADIUS = 10;
+const PARTIAL_RING_GAP: ExpressionSpecification = ['match', ['get', 'status'], 'jam', JAM_RING_GAP + 4, 3];
+
+function dashedRing(color: string, halo: string): ImageData {
+  const ratio = 2;
+  const stroke = 1.5;
+  const haloStroke = stroke + 2;
+  const size = (PARTIAL_RING_RADIUS + haloStroke) * 2 * ratio;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext('2d')!;
+  context.scale(ratio, ratio);
+  const ring = (width: number, style: string, dash: number[]) => {
+    context.lineWidth = width;
+    context.strokeStyle = style;
+    context.setLineDash(dash);
+    context.beginPath();
+    context.arc(size / ratio / 2, size / ratio / 2, PARTIAL_RING_RADIUS, 0, 2 * Math.PI);
+    context.stroke();
+  };
+  // Weisser Grund, damit die Striche auch auf den dunklen Autobahnen sichtbar bleiben
+  ring(haloStroke, halo, []);
+  const dash = (2 * Math.PI * PARTIAL_RING_RADIUS) / 16;
+  ring(stroke, color, [dash, dash]);
+  return context.getImageData(0, 0, size, size);
+}
 
 function statusColor(): ExpressionSpecification {
   const [jam, slow, free, nodata] = ALL_STATUSES.map((status) => colorToken(STATUS_TOKENS[status]));
@@ -88,6 +121,8 @@ function counterFeatures(counters: MapCounter[]): FeatureCollection<Point> {
     type: 'FeatureCollection',
     features: counters.map(({ counter, values, status }) => {
       const speed = decisiveSpeed(values);
+      const partial = partialText(values);
+      const label = speed !== null ? `${counter.name} · ${statusName(status)} · ${speed} ${de.units.kmh}` : `${counter.name} · ${statusName(status)}`;
       return {
         type: 'Feature',
         geometry: { type: 'Point', coordinates: [counter.lng, counter.lat] },
@@ -95,7 +130,8 @@ function counterFeatures(counters: MapCounter[]): FeatureCollection<Point> {
           id: counter.id,
           status,
           flow: values?.flow ?? null,
-          label: speed !== null ? `${counter.name} · ${statusName(status)} · ${speed} ${de.units.kmh}` : `${counter.name} · ${statusName(status)}`,
+          partial: partial !== null,
+          label: partial ? `${label} · ${partial}` : label,
         },
       };
     }),
@@ -134,7 +170,7 @@ function addTrafficLayers(map: MapLibreMap) {
         'circle-color': ['match', ['get', 'status'], 'nodata', white, statusColor()],
         'circle-opacity': ['match', ['get', 'status'], 'free', 0.8, 1],
         'circle-stroke-color': ['match', ['get', 'status'], 'nodata', nodata, white],
-        'circle-stroke-width': ['match', ['get', 'status'], 'jam', 2, 'slow', 1.5, 'nodata', 1.5, 0.75],
+        'circle-stroke-width': ['match', ['get', 'status'], 'jam', 2, 'slow', 1.5, 'nodata', 2, 0.75],
       },
     },
     beforeLabels,
@@ -151,6 +187,22 @@ function addTrafficLayers(map: MapLibreMap) {
         'circle-opacity': 0,
         'circle-stroke-color': colorToken('--traffic-jam'),
         'circle-stroke-width': 2,
+      },
+    },
+    beforeLabels,
+  );
+  map.addImage(PARTIAL_RING, dashedRing(nodata, white), { pixelRatio: 2 });
+  map.addLayer(
+    {
+      id: 'counter-partial-ring',
+      type: 'symbol',
+      source: 'counters',
+      filter: ['==', ['get', 'partial'], true],
+      layout: {
+        'icon-image': PARTIAL_RING,
+        'icon-size': byZoom(statusRadius, PARTIAL_RING_GAP, PARTIAL_RING_RADIUS),
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
       },
     },
     beforeLabels,

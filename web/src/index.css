@@ -149,6 +149,17 @@
   border: 2px solid var(--traffic-nodata);
 }
 
+/* Wie der gestrichelte Ring auf der Karte: nur ein Teil der Fahrstreifen liefert Daten */
+.dot--partial {
+  border: 2px dashed var(--traffic-nodata);
+}
+
+.legend-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* Lage als Text mit Punkt, z. B. in der Störungsliste */
 .status-badge {
   display: inline-flex;

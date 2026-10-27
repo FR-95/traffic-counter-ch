@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { Counter, CounterValues, Lane, LaneValues } from '../../server/src/types.ts';
 import { de } from './i18n/de.ts';
-import { decisiveSpeed, directionLabel, errorText, laneLabel, statusLabel, type Status } from './traffic.ts';
+import { decisiveSpeed, directionLabel, errorText, laneLabel, partialText, statusLabel, type Status } from './traffic.ts';
 
 interface Props {
   counter: Counter;
@@ -82,6 +82,7 @@ export function CounterDetails({ counter, values, status, selectionKey, onClose 
 
   const worst = decisiveSpeed(values);
   const showWorst = worst !== null && values?.speed != null && worst !== values.speed;
+  const partial = partialText(values);
 
   return (
     <section
@@ -111,6 +112,12 @@ export function CounterDetails({ counter, values, status, selectionKey, onClose 
         <span className={`dot dot--${status}`} aria-hidden="true" />
         {statusLabel(status)}
       </p>
+      {partial && (
+        <p className="meta legend-note">
+          <span className="dot dot--partial" aria-hidden="true" />
+          {partial}
+        </p>
+      )}
       <dl>
         <dt>{de.details.vehicles}</dt>
         <dd>{format(values?.flow, de.details.perHour)}</dd>

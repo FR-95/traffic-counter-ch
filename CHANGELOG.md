@@ -17,6 +17,7 @@
 - Teilbarer Link auf eine Zählstelle (`?z=<Zählstellen-ID>`).
 - Klick auf eine Zählstelle in der Karte zentriert sie; in der Übersicht zoomt die Karte dabei auf Zoom 12.
 - `worstSpeed` in `/api/measurements`: Geschwindigkeit der langsameren Fahrtrichtung.
+- Teilausfälle sichtbar: Liefert nur ein Teil der Fahrstreifen Daten, zeigt die Karte einen gestrichelten Ring; Tooltip und Details nennen z. B. «1 von 4 Fahrstreifen ohne Daten». Dazu `countedLanes` und `failedLanes` in `/api/measurements`.
 
 ### Geändert
 
@@ -25,7 +26,8 @@
 - Karte mit MapLibre GL statt Leaflet, im Stil der Intersys-Standortkarte: swisstopo-Vektorkacheln in Markenfarben, Beschriftung in Roboto, ohne Relief und Icons. Autobahnen in dunklem Teal, Kantonsstrassen und gestrichelte Kantonsgrenzen auch in der Übersicht der ganzen Schweiz. Kein Drehen und Neigen; auf Touch-Geräten verschiebt erst eine Zwei-Finger-Geste die Karte. Die Karte lädt nach der Seitenleiste.
 - Die Auswahl der Hintergrundkarte (swisstopo farbig/grau, OpenStreetMap) entfällt.
 - Die Verkehrslage richtet sich nach der langsameren Fahrtrichtung statt nach dem Durchschnitt beider Richtungen. Ein Stau in nur einer Richtung wird so nicht mehr als «Stockend» oder «Flüssig» ausgewiesen.
-- Ampel auch bei Rot-Grün-Schwäche lesbar: Flüssig klein und gedämpft, Stockend und Stau mit Mindestgrösse, Stau zusätzlich mit Ring, Keine Daten als hohler Ring. Kreise in der Übersicht kleiner.
+- Ampel auch bei Rot-Grün-Schwäche lesbar: Flüssig klein und gedämpft, Stockend und Stau mit Mindestgrösse, Stau zusätzlich mit Ring, Keine Daten als hohler Ring. Kreise in der Übersicht kleiner. «Keine Daten» etwas grösser und mit dunklerem Ring, damit es auf der Karte sichtbar bleibt.
+- Eine Zählstelle mit ausgefallenen Fahrstreifen und 0 Fahrzeugen/h auf den übrigen gilt als «Flüssig» statt «Keine Daten». Fahrstreifen, die in den Messwerten ganz fehlen, zählen als ausgefallen.
 - Details der ausgewählten Zählstelle oben in der Seitenleiste, rücken nach jeder Auswahl in Sicht und erhalten den Fokus; Escape schliesst, der Fokus kehrt zurück. Messwerte pro Fahrstreifen als Liste statt Tabelle, auch auf 320 px lesbar.
 - «Quelle und Betreiber» standardmässig zugeklappt, mit Zusammenfassung; doppelte Zeilen wie «Kanton Bern › Kanton Bern» entfallen.
 - Ladezustand: Anzahlen zeigen «–» statt «Keine Daten», solange Messwerte laden.

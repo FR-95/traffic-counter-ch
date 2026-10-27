@@ -16,10 +16,11 @@
 :root {
   /* Ampel der Verkehrslage auf der Karte. Das Design System hat keine Skala für Datenvisualisierung.
      Die Stufen unterscheiden sich nicht nur im Farbton: Flüssig ist mittelhell, gedämpft und klein (3.1:1 zu
-     --teal-surface), Stau dunkel mit Ring, Keine Daten hohl. So bleiben sie auch bei Rot-Grün-Schwäche trennbar. */
+     --teal-surface), Stau dunkel mit Ring, Keine Daten hohl. So bleiben sie auch bei Rot-Grün-Schwäche trennbar.
+     Der hohle Ring braucht --ink-muted statt --control-border, sonst geht er auf den hellen Kacheln unter. */
   --traffic-jam: var(--error);
   --traffic-free: color-mix(in srgb, var(--success) 75%, var(--white));
-  --traffic-nodata: var(--control-border);
+  --traffic-nodata: var(--ink-muted);
   /* Kein Orange im Design System, Peach ist dem Wachstumsclaim vorbehalten und auf grauen Kartenkacheln
      zu hell. Darum ein eigener Wert zwischen Fehler und Erfolg; als Rückmeldung ans Design System gemeldet. */
   --traffic-slow: #c76a12;

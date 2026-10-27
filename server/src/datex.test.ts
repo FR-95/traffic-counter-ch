@@ -83,8 +83,15 @@ describe('parseMeasurements', () => {
   });
 
   it('zählt Ein- und Ausfahrten nicht zur Hauptfahrbahn', () => {
-    expect(result.counters['CH:0002']).toMatchObject({ flow: 0, speed: null, errors: [] });
+    expect(result.counters['CH:0002']).toMatchObject({ flow: 0, speed: null, countedLanes: 1, failedLanes: 0, errors: [] });
     expect(result.counters['CH:0002']?.lanes['CH:0002.02']?.flow).toEqual({ car: 120 });
+  });
+
+  it('zählt Fahrstreifen mit Fehler oder ohne Messwerte als ausgefallen', () => {
+    expect(result.counters['CH:0001']).toMatchObject({ countedLanes: 2, failedLanes: 1 });
+    const first = records.get('CH:0001.01')!;
+    const withMissing = new Map([...records, ['CH:0001.03', { ...first, id: 'CH:0001.03' }]]);
+    expect(parseMeasurements(measurementsXml, withMissing).counters['CH:0001']).toMatchObject({ flow: 800, countedLanes: 3, failedLanes: 2 });
   });
 
   it('ignoriert unbekannte Messstellen', () => {

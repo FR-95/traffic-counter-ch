@@ -36,10 +36,17 @@ export function decisiveSpeed(values: CounterValues | undefined): number | null 
 export function statusOf(values: CounterValues | undefined): Status {
   if (!values) return 'nodata';
   const speed = decisiveSpeed(values);
-  if (speed === null) return values.flow === 0 && values.errors.length === 0 ? 'free' : 'nodata';
+  if (speed === null) return values.flow === 0 ? 'free' : 'nodata';
   if (speed < JAM_BELOW_KMH) return 'jam';
   if (speed < SLOW_BELOW_KMH) return 'slow';
   return 'free';
+}
+
+/** «1 von 4 Fahrstreifen ohne Daten», wenn die Lage nur auf einem Teil der Fahrstreifen beruht; sonst null. */
+export function partialText(values: CounterValues | undefined): string | null {
+  // Ältere Cache-Einträge des Servers kennen failedLanes noch nicht.
+  if (!values?.failedLanes || statusOf(values) === 'nodata') return null;
+  return de.traffic.partial(values.failedLanes, values.countedLanes);
 }
 
 export function errorText(code: string): string {

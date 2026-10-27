@@ -288,8 +288,12 @@ export function worstDirectionSpeed(lanes: [string, LaneValues][], records: Map<
 export function parseMeasurements(xml: string, records: Map<string, SiteRecord>): MeasurementsResponse {
   const payload = payloadOf(xml);
   const lanesByCounter = new Map<string, Record<string, LaneValues>>();
+  const laneIdsByCounter = new Map<string, string[]>();
   let measurementTime: string | null = null;
 
+  for (const record of records.values()) {
+    laneIdsByCounter.set(record.counterId, [...(laneIdsByCounter.get(record.counterId) ?? []), record.id]);
+  }
   for (const site of list(get(payload, 'siteMeasurements'))) {
     const laneId = text(get(site, 'measurementSiteReference', '@_id'));
     const record = laneId ? records.get(laneId) : undefined;
@@ -304,11 +308,19 @@ export function parseMeasurements(xml: string, records: Map<string, SiteRecord>)
   const counters: Record<string, CounterValues> = {};
   for (const [counterId, lanes] of lanesByCounter) {
     const values = Object.values(lanes);
-    const through = Object.entries(lanes).filter(([laneId]) => isThroughLane(records.get(laneId)));
-    const counted = through.length > 0 ? through : Object.entries(lanes);
+    // Laut Messstellentabelle, damit auch Fahrstreifen ohne Eintrag in den Messwerten als ausgefallen zählen.
+    const laneIds = laneIdsByCounter.get(counterId) ?? Object.keys(lanes);
+    const throughIds = laneIds.filter((laneId) => isThroughLane(records.get(laneId)));
+    const countedIds = throughIds.length > 0 ? throughIds : laneIds;
+    const counted = countedIds.flatMap((laneId): [string, LaneValues][] => {
+      const lane = lanes[laneId];
+      return lane ? [[laneId, lane]] : [];
+    });
     counters[counterId] = {
       ...aggregate(counted.map(([, lane]) => lane)),
       worstSpeed: worstDirectionSpeed(counted, records),
+      countedLanes: countedIds.length,
+      failedLanes: countedIds.length - counted.filter(([, lane]) => lane.error === null).length,
       lanes,
       errors: [...new Set(values.map((lane) => lane.error).filter((error) => error !== null))],
     };

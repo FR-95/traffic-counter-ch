@@ -27,6 +27,7 @@ export const de = {
   statusFilter: {
     legend: 'Lage',
     hint: 'Massgebend ist die langsamere Fahrtrichtung. Kreisgrösse = Fahrzeuge pro Stunde.',
+    partial: 'Gestrichelter Ring: Nicht alle Fahrstreifen liefern Daten.',
     countLoading: '–',
   },
   disruptions: {
@@ -63,6 +64,7 @@ export const de = {
   traffic: {
     status: { jam: 'Stau', slow: 'Stockend', free: 'Flüssig', nodata: 'Keine Daten' },
     threshold: { jam: '< 10 km/h', slow: '< 30 km/h' },
+    partial: (failed: number, counted: number) => `${failed} von ${counted} Fahrstreifen ohne Daten`,
     errors: {
       VD_OFFLINE: 'Verbindung zum Zählgerät unterbrochen',
       VD_ERROR: 'Zählgerät defekt',

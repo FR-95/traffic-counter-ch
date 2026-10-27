@@ -37,7 +37,7 @@ HOST=0.0.0.0 npm start
 | Endpoint | Inhalt |
 |---|---|
 | `GET /api/counters` | Zählstellen mit Name, Strasse, Koordinaten, Fahrstreifen, Quelle und Betreiber |
-| `GET /api/measurements` | Fahrzeuge/h und Ø km/h pro Zählstelle und Fahrstreifen, km/h der langsameren Fahrtrichtung (`worstSpeed`, bestimmt die Verkehrslage), Fehlercodes |
+| `GET /api/measurements` | Fahrzeuge/h und Ø km/h pro Zählstelle und Fahrstreifen, km/h der langsameren Fahrtrichtung (`worstSpeed`, bestimmt die Verkehrslage), gezählte und ausgefallene Fahrstreifen (`countedLanes`, `failedLanes`), Fehlercodes |
 | `GET /api/health` | Status pro Quelle (Messstellen, Messwerte): letzter Abruf, Fehler, Daten aus Cache |
 
 ## Ausfallverhalten
@@ -49,4 +49,5 @@ HOST=0.0.0.0 npm start
 | Eigener Server nicht erreichbar | Browser behält die zuletzt geladenen Daten und meldet den Verbindungsverlust |
 | Vektorkacheln von swisstopo | Hinweis im UI. Die Zählstellen bleiben auf hellem Grund sichtbar. Beim Verschieben oder Zoomen lädt die Karte neu. |
 | Browser ohne WebGL | Fehlermeldung im UI. Suche, Liste und Details funktionieren weiterhin. |
+| Einzelne Fahrstreifen einer Zählstelle ohne Daten | Lage und Summen aus den übrigen Fahrstreifen; die Karte zeigt einen gestrichelten Ring, Tooltip und Details nennen die Anzahl. Liefert kein Fahrstreifen der Hauptfahrbahn Daten: «Keine Daten», Ein- und Ausfahrten springen nicht ein. |
 | Sensor-/TMC-Daten | Keine Laufzeitabhängigkeit, Snapshots liegen in `server/data/` |

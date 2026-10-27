@@ -158,6 +158,10 @@ export function App() {
               </label>
             ))}
             <p className="meta">{de.statusFilter.hint}</p>
+            <p className="meta legend-note">
+              <span className="dot dot--partial" aria-hidden="true" />
+              {de.statusFilter.partial}
+            </p>
           </fieldset>
 
           <CounterGroups counters={mapCounters} hidden={hiddenGroups} onToggle={toggleGroups} onPick={pick} />

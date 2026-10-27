@@ -51,6 +51,10 @@ export interface CounterValues {
   speed: number | null;
   /** km/h der langsamsten Fahrtrichtung (gleiche Fahrstreifen wie `speed`); bestimmt die Verkehrslage */
   worstSpeed: number | null;
+  /** Fahrstreifen, aus denen `flow`, `speed` und `worstSpeed` berechnet werden (laut Messstellentabelle) */
+  countedLanes: number;
+  /** davon ohne Daten: mit Fehlercode oder in den Messwerten nicht enthalten */
+  failedLanes: number;
   lanes: Record<string, LaneValues>;
   errors: string[];
 }
