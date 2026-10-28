@@ -34,6 +34,8 @@ export class TrafficStore {
   measurements: MeasurementsResponse | null = null;
   readonly status: Record<Source, SourceStatus> = { sites: emptyStatus(), measurements: emptyStatus() };
   private records = new Map<string, SiteRecord>();
+  private siteTableVersion: string | null = null;
+  private requestedSiteTableVersion: string | null = null;
   private history: MeasurementsResponse[] = [];
   private timers = new Set<NodeJS.Timeout>();
   private measurementsStarted = false;
@@ -88,6 +90,7 @@ export class TrafficStore {
     const table = parseSiteTable(xml);
     if (table.records.length === 0) throw new Error('Messstellentabelle ist leer');
     this.records = new Map(table.records.map((record) => [record.id, record]));
+    this.siteTableVersion = table.version;
     this.counters = {
       updatedAt: table.publicationTime ?? updatedAt,
       counters: buildCounters(table.records, this.options.tmc, this.options.sensors),
@@ -125,6 +128,21 @@ export class TrafficStore {
     const measurements = parseMeasurements(await this.options.pull('pullMeasuredData'), this.records);
     this.applyMeasurements(measurements);
     await this.options.cache?.write(MEASUREMENTS_CACHE, JSON.stringify(measurements));
+    await this.syncSiteTable(measurements.siteTableVersion);
+  }
+
+  /** Verweisen die Messwerte auf eine neuere Messstellentabelle, wird diese sofort geladen statt erst im 6-h-Takt. */
+  private async syncSiteTable(referenced: string | null): Promise<void> {
+    if (!referenced || referenced === this.siteTableVersion || referenced === this.requestedSiteTableVersion) return;
+    this.requestedSiteTableVersion = referenced;
+    console.info(`Messstellentabelle: Version ${this.siteTableVersion ?? '?'} → ${referenced}, wird neu geladen`);
+    try {
+      await this.refreshSites();
+      this.status.sites = { ...emptyStatus(), updatedAt: new Date().toISOString() };
+    } catch (error) {
+      this.requestedSiteTableVersion = null;
+      console.error(`${LABELS.sites}: ${message(error)}`);
+    }
   }
 
   private applyMeasurements(measurements: MeasurementsResponse): void {

@@ -53,6 +53,14 @@ function LaneItem({ lane, values, showTowards }: { lane: Lane; values: LaneValue
             <>
               <dt>{de.details.lorries}</dt>
               <dd>{flowAndSpeed(values?.flow.lorry, values?.speed.lorry)}</dd>
+              {!!values?.flow.any && (
+                <>
+                  <dt>{de.details.unclassified}</dt>
+                  <dd>
+                    <span className="nowrap">{format(values.flow.any, de.units.vehiclesPerHour)}</span>
+                  </dd>
+                </>
+              )}
             </>
           )}
         </dl>

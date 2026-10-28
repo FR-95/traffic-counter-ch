@@ -24,8 +24,14 @@
 - TMC-Ortstabelle um Strassenklasse und Punkttyp ergänzt (`server/data/tmc-locations.json`, weiterhin Version 7.5).
 - Seite «So funktioniert die Karte» unter `/info`: was die Karte zeigt, wie die Lage nach ASTRA beurteilt wird, was sie nicht zeigt, Datenquellen. Erreichbar über die Kopfleiste und aus der Legende.
 
+- Neue Version der Messstellentabelle (`measurementSiteTableReference` in den Messwerten) lädt die Tabelle sofort neu, wie im Road Traffic Cookbook gefordert. `siteTableVersion` in `/api/measurements`.
+- Info-Seite: Fahrzeugklassen, Aktualität der Daten, Datenqualität (Rohdaten ohne formelle Prüfung) und Link zum Road Traffic Cookbook.
+
 ### Geändert
 
+- Fahrzeuge ohne Klassifizierung zählen zur Verkehrsmenge (bisher ignoriert, sobald Personen- oder Lastwagen-Werte vorlagen). Das wirkt sich auch auf die Mindestverkehr-Regel aus. Die Details zeigen sie als «Ohne Klassifizierung».
+- Ungültige Geschwindigkeiten (-1) fliessen nicht mehr in den Durchschnitt ein.
+- Details nennen «Leichtverkehr» und «Schwerverkehr» (Fahrzeugklassen 1–7 bzw. 8–10) statt «Personenwagen» und «Lastwagen».
 - Gestaltung nach dem Intersys Design System: Kopfleiste in Deep Teal mit Logo, Roboto (selbst gehostet), Karten, Notices und Tabellen aus dem Design System, Ampelfarben der Karte aus Tokens, Klickflächen von mindestens 40 px und Sie-Form.
 - Die Suche hat ein sichtbares Label und einen Hinweis statt eines Platzhaltertexts.
 - Karte mit MapLibre GL statt Leaflet, im Stil der Intersys-Standortkarte: swisstopo-Vektorkacheln in Markenfarben, Beschriftung in Roboto, ohne Relief und Icons. Autobahnen in dunklem Teal, Kantonsstrassen und gestrichelte Kantonsgrenzen auch in der Übersicht der ganzen Schweiz. Kein Drehen und Neigen; auf Touch-Geräten verschiebt erst eine Zwei-Finger-Geste die Karte. Die Karte lädt nach der Seitenleiste.

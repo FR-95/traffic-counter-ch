@@ -74,6 +74,8 @@ export interface CounterValues {
 export interface MeasurementsResponse {
   publicationTime: string;
   measurementTime: string | null;
+  /** Version der Messstellentabelle, auf die sich die Messwerte beziehen; null in älteren Cache-Einträgen */
+  siteTableVersion: string | null;
   counters: Record<string, CounterValues>;
 }
 

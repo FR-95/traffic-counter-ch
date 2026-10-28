@@ -78,6 +78,7 @@ describe('applyAssessment', () => {
   const at = (time: string, speed: number): MeasurementsResponse => ({
     publicationTime: time,
     measurementTime: time,
+    siteTableVersion: null,
     counters: { A: minute(speed), B: minute(speed) },
   });
   const areas = new Map([

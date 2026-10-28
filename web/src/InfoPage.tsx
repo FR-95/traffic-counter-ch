@@ -6,6 +6,7 @@ import { ALL_STATUSES, statusName } from './traffic.ts';
 
 const SOURCES: { key: keyof typeof de.info.sources; url: string }[] = [
   { key: 'measurements', url: 'https://opentransportdata.swiss/de/dataset/trafficcounters' },
+  { key: 'cookbook', url: 'https://opentransportdata.swiss/de/cookbook/road-traffic-cookbook/rt-road-traffic-counters/' },
   { key: 'definition', url: 'https://www.bfs.admin.ch/asset/de/8288664' },
   { key: 'tmc', url: 'https://data.opentransportdata.swiss/dataset/rds-tmc' },
   { key: 'sensors', url: 'https://www.arcgis.com/apps/dashboards/1673b262537546098589ad3820e5ece2' },

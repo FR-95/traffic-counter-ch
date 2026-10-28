@@ -26,6 +26,7 @@ export interface SiteRecord {
 
 export interface SiteTable {
   publicationTime: string | null;
+  version: string | null;
   records: SiteRecord[];
 }
 
@@ -156,11 +157,12 @@ function parseRecord(node: unknown): SiteRecord | null {
 
 export function parseSiteTable(xml: string): SiteTable {
   const payload = payloadOf(xml);
-  const records = list(get(payload, 'measurementSiteTable'))
+  const tables = list(get(payload, 'measurementSiteTable'));
+  const records = tables
     .flatMap((table) => list(get(table, 'measurementSiteRecord')))
     .map(parseRecord)
     .filter((record): record is SiteRecord => record !== null);
-  return { publicationTime: text(get(payload, 'publicationTime')), records };
+  return { publicationTime: text(get(payload, 'publicationTime')), version: text(get(tables[0], '@_version')), records };
 }
 
 const round6 = (value: number) => Math.round(value * 1e6) / 1e6;
@@ -236,10 +238,11 @@ function parseLaneValues(node: unknown, record: SiteRecord): LaneValues {
   return values;
 }
 
+/** Mit Fahrzeugklassen zählt `any` die Fahrzeuge ohne Klassifizierung (zusätzlich zu Auto und Lastwagen), sonst alle Fahrzeuge. */
 function laneFlow(lane: LaneValues): number | null {
   const { car, lorry, any } = lane.flow;
-  if (car !== undefined || lorry !== undefined) return (car ?? 0) + (lorry ?? 0);
-  return any ?? null;
+  if (car === undefined && lorry === undefined && any === undefined) return null;
+  return (car ?? 0) + (lorry ?? 0) + (any ?? 0);
 }
 
 /** Summe der Fahrzeuge/h und nach Verkehrsmenge gewichtete Durchschnittsgeschwindigkeit. */
@@ -260,7 +263,7 @@ export function aggregate(lanes: LaneValues[]): Pick<CounterValues, 'flow' | 'sp
     for (const vehicle of classes) {
       const speed = lane.speed[vehicle];
       const count = lane.flow[vehicle];
-      if (speed && count) {
+      if (speed && speed > 0 && count) {
         weightedSpeed += speed * count;
         weight += count;
       }
@@ -341,6 +344,7 @@ export function parseMeasurements(xml: string, records: Map<string, SiteRecord>)
   return {
     publicationTime: text(get(payload, 'publicationTime')) ?? new Date().toISOString(),
     measurementTime,
+    siteTableVersion: text(get(payload, 'measurementSiteTableReference', '@_version')),
     counters,
   };
 }

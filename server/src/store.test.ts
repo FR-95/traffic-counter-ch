@@ -51,6 +51,18 @@ describe('TrafficStore', () => {
     expect(store.unavailableReason('measurements')).toBe('Messwerte werden geladen …');
   });
 
+  it('lädt die Messstellentabelle neu, wenn die Messwerte auf eine neuere Version verweisen', async () => {
+    const pulls: PullAction[] = [];
+    const newer = measurementsXml.replace('id="OTD:TrafficData" version="31"', 'id="OTD:TrafficData" version="32"');
+    const store = createStore((action) => {
+      pulls.push(action);
+      return Promise.resolve(action === 'pullMeasuredData' ? newer : siteTableXml);
+    });
+    await vi.waitFor(() => expect(store.measurements).not.toBeNull());
+    await vi.waitFor(() => expect(pulls.filter((action) => action === 'pullMeasurementSiteTable')).toHaveLength(2));
+    expect(pulls.filter((action) => action === 'pullMeasuredData')).toHaveLength(1);
+  });
+
   it('führt Fehler pro Quelle getrennt', async () => {
     const store = createStore((action) => (action === 'pullMeasuredData' ? offline() : online(action)));
     await vi.waitFor(() => expect(store.status.measurements.error).not.toBeNull());

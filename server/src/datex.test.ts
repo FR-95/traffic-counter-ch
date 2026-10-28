@@ -7,6 +7,7 @@ describe('parseSiteTable', () => {
   it('liest Fahrstreifen mit Kanälen, Richtung und Ort', () => {
     const table = parseSiteTable(siteTableXml);
     expect(table.publicationTime).toBe('2026-10-27T07:24:18Z');
+    expect(table.version).toBe('31');
     expect(table.records).toHaveLength(4);
     const [first] = table.records;
     expect(first).toMatchObject({
@@ -77,6 +78,7 @@ describe('parseMeasurements', () => {
   it('aggregiert Verkehrsmenge und gewichtete Geschwindigkeit', () => {
     expect(result.publicationTime).toBe('2026-10-27T07:24:18Z');
     expect(result.measurementTime).toBe('2026-10-27T07:23:00Z');
+    expect(result.siteTableVersion).toBe('31');
     expect(result.counters['CH:0001']).toMatchObject({
       flow: 800,
       speed: 95,
@@ -117,6 +119,15 @@ describe('Hilfsfunktionen', () => {
 
   it('aggregate nutzt anyVehicle, wenn keine Fahrzeugklassen vorhanden sind', () => {
     expect(aggregate([{ flow: { any: 300 }, speed: { any: 50 }, error: null }])).toEqual({ flow: 300, speed: 50 });
+  });
+
+  it('aggregate zählt Fahrzeuge ohne Klassifizierung zur Verkehrsmenge', () => {
+    const lane: LaneValues = { flow: { car: 60, lorry: 0, any: 240 }, speed: { car: 11, any: -1 }, error: null };
+    expect(aggregate([lane])).toEqual({ flow: 300, speed: 11 });
+  });
+
+  it('aggregate ignoriert ungültige Geschwindigkeiten', () => {
+    expect(aggregate([{ flow: { any: 300 }, speed: { any: -1 }, error: null }])).toEqual({ flow: 300, speed: null });
   });
 
   it('slowestDirection liefert die langsamste Fahrtrichtung statt des Durchschnitts', () => {

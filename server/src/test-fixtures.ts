@@ -51,6 +51,7 @@ const site = (id: string, values: string) => `<dx223:siteMeasurements>
 <dx223:measurementTimeDefault>2026-10-27T07:23:00Z</dx223:measurementTimeDefault>${values}</dx223:siteMeasurements>`;
 
 export const measurementsXml = envelope(`
+<dx223:measurementSiteTableReference targetClass="MeasurementSiteTable" id="OTD:TrafficData" version="31"/>
 ${site('CH:0001.01', flow('11', 600) + speed('12', '100.00') + flow('21', 200) + speed('22', '80.00'))}
 ${site('CH:0001.02', value('0', '<dx223:vehicleFlow><dx223:dataError>true</dx223:dataError><dx223:reasonForDataError><dx223:values><dx223:value lang="en">VD_OFFLINE</dx223:value></dx223:values></dx223:reasonForDataError><dx223:vehicleFlowRate>0</dx223:vehicleFlowRate></dx223:vehicleFlow>'))}
 ${site('CH:0002.01', flow('11', 0) + flow('21', 0))}
