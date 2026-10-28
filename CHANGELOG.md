@@ -29,6 +29,7 @@
 
 ### Geändert
 
+- Messwerte werden 25 s nach der vollen Minute abgerufen (`MEASUREMENT_OFFSET_MS`), kurz nach der Veröffentlichung. Die Daten sind dadurch im Mittel rund 25 s aktueller. Der Browser fragt bei :00 und :30 ab, statt in beliebiger Phase.
 - Fahrzeuge ohne Klassifizierung zählen zur Verkehrsmenge (bisher ignoriert, sobald Personen- oder Lastwagen-Werte vorlagen). Das wirkt sich auch auf die Mindestverkehr-Regel aus. Die Details zeigen sie als «Ohne Klassifizierung».
 - Ungültige Geschwindigkeiten (-1) fliessen nicht mehr in den Durchschnitt ein.
 - Details nennen «Leichtverkehr» und «Schwerverkehr» (Fahrzeugklassen 1–7 bzw. 8–10) statt «Personenwagen» und «Lastwagen».

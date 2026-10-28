@@ -19,6 +19,8 @@ export interface TrafficStoreOptions {
   sensors: SensorLookup;
   cache?: DiskCache;
   measurementIntervalMs: number;
+  /** Abrufe auf diesen Versatz nach der vollen Minute legen (opentransportdata.swiss veröffentlicht rund 20 s danach); ohne Angabe im Abstand von `measurementIntervalMs` */
+  measurementOffsetMs?: number;
   siteTableIntervalMs: number;
 }
 
@@ -49,7 +51,10 @@ export class TrafficStore {
     void this.restoreFromCache().finally(() => {
       const { siteTableIntervalMs, measurementIntervalMs } = this.options;
       this.loop('sites', () => this.refreshSites(), siteTableIntervalMs, this.remaining('sites', siteTableIntervalMs));
-      if (this.records.size > 0) this.startMeasurements(this.remaining('measurements', measurementIntervalMs));
+      if (this.records.size > 0) {
+        const remaining = this.remaining('measurements', measurementIntervalMs);
+        this.startMeasurements(remaining > 0 ? remaining + this.untilNextSlot(Date.now() + remaining) : 0);
+      }
     });
   }
 
@@ -76,7 +81,16 @@ export class TrafficStore {
   private startMeasurements(initialDelayMs = 0): void {
     if (this.measurementsStarted) return;
     this.measurementsStarted = true;
-    this.loop('measurements', () => this.refreshMeasurements(), this.options.measurementIntervalMs, initialDelayMs);
+    this.loop('measurements', () => this.refreshMeasurements(), this.options.measurementIntervalMs, initialDelayMs, (now) =>
+      this.untilNextSlot(now),
+    );
+  }
+
+  /** Wartezeit bis zum nächsten Abrufzeitpunkt nach `now`. */
+  private untilNextSlot(now: number): number {
+    const { measurementIntervalMs: interval, measurementOffsetMs: offset } = this.options;
+    if (offset === undefined) return interval;
+    return interval - ((((now - offset) % interval) + interval) % interval);
   }
 
   /** Restlaufzeit eines Cache-Eintrags, damit Neustarts nicht sofort erneut die API abfragen. */
@@ -151,7 +165,13 @@ export class TrafficStore {
     this.measurements = measurements;
   }
 
-  private loop(source: Source, task: () => Promise<void>, intervalMs: number, initialDelayMs = 0): void {
+  private loop(
+    source: Source,
+    task: () => Promise<void>,
+    intervalMs: number,
+    initialDelayMs = 0,
+    nextDelay: (now: number) => number = () => intervalMs,
+  ): void {
     const schedule = (delay: number) => {
       const timer = setTimeout(() => {
         this.timers.delete(timer);
@@ -160,14 +180,15 @@ export class TrafficStore {
       this.timers.add(timer);
     };
     const run = async () => {
-      let delay = intervalMs;
+      let delay: number;
       try {
         await task();
         this.status[source] = { ...emptyStatus(), updatedAt: new Date().toISOString() };
+        delay = nextDelay(Date.now());
       } catch (error) {
         this.status[source] = { ...this.status[source], error: message(error), failedAt: new Date().toISOString() };
         console.error(`${LABELS[source]}: ${message(error)}`);
-        delay = Math.min(intervalMs, RETRY_DELAY_MS);
+        delay = Math.min(nextDelay(Date.now()), RETRY_DELAY_MS);
       }
       schedule(delay);
     };

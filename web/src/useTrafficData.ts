@@ -18,6 +18,9 @@ async function getJson<T>(url: string, signal: AbortSignal): Promise<T> {
   throw new Error(body?.error ?? (response.status >= 500 ? SERVER_UNREACHABLE : `HTTP ${response.status}`));
 }
 
+/** Abrufe auf :00 und :30 legen: Der Server holt die Daten bei :25 und hat sie dann bereit. */
+const untilNextSlot = () => REFRESH_MS - (Date.now() % REFRESH_MS);
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -62,7 +65,7 @@ export function useTrafficData() {
       setServerError(status.status === 'rejected' ? errorMessage(status.reason) : null);
       setCheckedAt(Date.now());
       const failed = measured.status === 'rejected' || status.status === 'rejected';
-      timer = setTimeout(load, failed ? RETRY_MS : REFRESH_MS);
+      timer = setTimeout(load, failed ? RETRY_MS : untilNextSlot());
     };
     void load();
     return () => {

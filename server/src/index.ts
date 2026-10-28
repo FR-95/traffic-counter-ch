@@ -13,6 +13,7 @@ const store = new TrafficStore({
   sensors: loadSensors(config.sensorsFile),
   cache: new DiskCache(config.cacheDir),
   measurementIntervalMs: config.measurementIntervalMs,
+  measurementOffsetMs: config.measurementOffsetMs,
   siteTableIntervalMs: config.siteTableIntervalMs,
 });
 store.start();

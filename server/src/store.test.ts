@@ -15,13 +15,14 @@ const online = (action: PullAction) => Promise.resolve(action === 'pullMeasuredD
 const stores: TrafficStore[] = [];
 const dirs: string[] = [];
 
-function createStore(pull: (action: PullAction) => Promise<string>, cache?: DiskCache, intervalMs = HOUR) {
+function createStore(pull: (action: PullAction) => Promise<string>, cache?: DiskCache, intervalMs = HOUR, measurementOffsetMs?: number) {
   const store = new TrafficStore({
     pull,
     cache,
     tmc: () => undefined,
     sensors: NO_SENSORS,
     measurementIntervalMs: intervalMs,
+    measurementOffsetMs,
     siteTableIntervalMs: intervalMs,
   });
   stores.push(store);
@@ -38,6 +39,7 @@ async function tempCache() {
 afterEach(async () => {
   stores.splice(0).forEach((store) => store.stop());
   await Promise.all(dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -61,6 +63,28 @@ describe('TrafficStore', () => {
     await vi.waitFor(() => expect(store.measurements).not.toBeNull());
     await vi.waitFor(() => expect(pulls.filter((action) => action === 'pullMeasurementSiteTable')).toHaveLength(2));
     expect(pulls.filter((action) => action === 'pullMeasuredData')).toHaveLength(1);
+  });
+
+  it('ruft die Messwerte jede Minute zum festen Versatz nach der vollen Minute ab', async () => {
+    vi.useFakeTimers({ now: Date.parse('2026-10-28T12:00:10Z') });
+    const measuredPulls = vi.fn();
+    createStore(
+      (action) => {
+        if (action === 'pullMeasuredData') measuredPulls();
+        return online(action);
+      },
+      undefined,
+      60_000,
+      25_000,
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    expect(measuredPulls).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(14_000);
+    expect(measuredPulls).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(measuredPulls).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(measuredPulls).toHaveBeenCalledTimes(3);
   });
 
   it('führt Fehler pro Quelle getrennt', async () => {
